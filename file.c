@@ -114,11 +114,24 @@ FILE *createFileSol(char *nomef){
   return f1;
 }
 
-void printSolutions(FILE *f, Sol *Data){
+void printSolutions(FILE *f, LGraph *Graphs){
+  int i = 0;
+  Graph *G = NULL;
+  link *aux = NULL;
 
-  while(Data!=NULL){
-    fprintf(f, "%d %d %c %d %d %d\n\n", Data->nLines, Data->nCols, Data->mode,
-                                        Data->moves ,Data->valid, Data->cost);
-    Data=Data->nSol;
+  G=Graphs->G;
+
+  for(i=0; i<G->V;i++){
+    aux=G->adj[i];
+    if(aux==NULL){
+      fprintf(f,"%d-> -1\n", i);
+    }else{
+      fprintf(f,"%d-> ", i);
+      while(aux!=NULL){
+        fprintf(f, "%d:%d ", aux->v, aux->weight);
+        aux=aux->next;
+      }
+      fprintf(f,"-1\n");
+    }
   }
 }

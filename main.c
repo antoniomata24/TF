@@ -18,8 +18,6 @@ int main(int argc, char *argv[]){
   Puzzles *Puzzle = NULL;
   Sol *Solutions = NULL;
   LGraph *Graphs = NULL;
-  Graph *G=NULL;
-  link *aux = NULL;
 
   int i=0;
 
@@ -31,22 +29,8 @@ int main(int argc, char *argv[]){
   Solutions = mainOper(Puzzle);
   Graphs = createGraph(Puzzle);
 
-  G=Graphs->G;
-  for(i=0; i<G->V;i++){
-    aux=G->adj[i];
-    if(aux==NULL){
-      printf("%d-> -1\n", i);
-    }else{
-      printf("%d-> ", i);
-      while(aux!=NULL){
-        printf( "%d:%d ", aux->v, aux->weight);
-        aux=aux->next;
-      }
-    printf("-1\n");
-  }
-  }
   fOut = createFileSol(argv[1]);
-  printSolutions(fOut, Solutions);
+  printSolutions(fOut, Graphs);
 
   freeAllPuzzle(Puzzle);
   freeSolution(Solutions);
