@@ -23,35 +23,35 @@ LGraph *createGraph (Puzzles *Data){
         vi=convertV(i, j, Data);
         if(ValidateMoveA(i, j, 1, 2, Data)==1){
           vf=convertV(i+1, j+2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j+2]);
         }
         if(ValidateMoveA(i, j, 1, -2, Data)==1){
           vf=convertV(i+1, j-2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j-2]);
         }
         if(ValidateMoveA(i, j, -1, 2, Data)==1){
           vf=convertV(i-1, j+2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j+2]);
         }
         if(ValidateMoveA(i, j, -1, -2, Data)==1){
           vf=convertV(i-1, j-2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j-2]);
         }
         if(ValidateMoveA(i, j, 2, 1, Data)==1){
-          vf=convertV(i+2, j+0, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          vf=convertV(i+2, j+1, Data);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j+1]);
         }
         if(ValidateMoveA(i, j, 2, -1, Data)==1){
           vf=convertV(i+2, j-1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j-1]);
         }
         if(ValidateMoveA(i, j, -2, 1, Data)==1){
-          vf=convertV(i-2, j-1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          vf=convertV(i-2, j+1, Data);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j+1]);
         }
         if(ValidateMoveA(i, j, -2, -1, Data)==1){
           vf=convertV(i-2, j-1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i][j]);
+          GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j-1]);
         }
       }
     }
@@ -143,6 +143,6 @@ Graph *GRAPHinit(int V)
 void GRAPHinsertE(Graph *G, int v, int w, int weight)
 {
   G->adj[v] = NEW(w, G->adj[v], weight);
-  /**G->adj[w] = NEW(v, G->adj[w], weight);*/
+  /*G->adj[w] = NEW(v, G->adj[w], weight);*/
   G->E++;
 }

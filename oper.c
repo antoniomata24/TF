@@ -136,7 +136,7 @@ void computeSolutionA(int x, int y, Puzzles *Data, Sol *Solution){
 int ValidateMoveA(int x, int y, int difx, int dify, Puzzles *Data){
   if(x+difx<0 || y+dify < 0 || x+difx>=Data->lines || y+dify>=Data->cols){
     return 0;
-  }else if(Data->board[x+difx][y+dify]==0){
+  }else if(Data->board[x+difx][y+dify]==0 || Data->board[x][y]==0){
     return 0;
   }else{
     return 1;

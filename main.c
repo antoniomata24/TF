@@ -34,13 +34,16 @@ int main(int argc, char *argv[]){
   G=Graphs->G;
   for(i=0; i<G->V;i++){
     aux=G->adj[i];
-    if(aux!=NULL){
+    if(aux==NULL){
+      printf("%d-> -1\n", i);
+    }else{
+      printf("%d-> ", i);
       while(aux!=NULL){
-        fprintf(fOut, "%d:%d ", aux->x, aux->weight);
+        printf( "%d:%d ", aux->v, aux->weight);
         aux=aux->next;
       }
-    }
-    fprintf(fOut, "-1\n");
+    printf("-1\n");
+  }
   }
   fOut = createFileSol(argv[1]);
   printSolutions(fOut, Solutions);
