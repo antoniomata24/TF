@@ -1,5 +1,6 @@
 #include "grafs.h"
 
+
 LGraph *createGraph (Puzzles *Data){
 
   Puzzles *AuxPuzzle = NULL;
@@ -69,7 +70,6 @@ LGraph *createGraph (Puzzles *Data){
   }
 
   return First;
-
 }
 
 int convertV(int x, int y,Puzzles *Data){

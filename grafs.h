@@ -9,6 +9,7 @@ typedef struct node link;
 typedef struct _graph Graph;
 typedef struct _ListG LGraph;
 
+
 struct node {
   int v;
   int weight;
