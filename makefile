@@ -27,7 +27,7 @@ oper.o : oper.h oper.c
 grafs.o : grafs.h grafs.c
 	$(CC) -g -c grafs.c
 clean::
-	rm -f *.o core a.out tuktuk *~
+	rm -f *.o *.valid core a.out tuktuk *~
 
 depend::
 	makedepend $(SOURCES)
