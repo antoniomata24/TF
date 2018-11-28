@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#DEFINE INFINITY 99999
+
 typedef struct _Puzzles Puzzles;
 typedef struct _Pos Pos;
 typedef struct _Sol Sol;
