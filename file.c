@@ -114,8 +114,8 @@ FILE *createFileSol(char *nomef){
   return f1;
 }
 
-void printSolutions(FILE *f, LGraph *Graphs){
-  int i = 0;
+void printSolutions(FILE *f, LGraph *Graphs, int *sol, Puzzles *Puzzle, int ini, int fim){
+  /*int i = 0;
   Graph *G = NULL;
   link *aux = NULL;
 
@@ -133,5 +133,34 @@ void printSolutions(FILE *f, LGraph *Graphs){
       }
       fprintf(f,"-1\n");
     }
+  }
+
+  fprintf(f, "\n\n");*/
+
+  int custo=0, passos=0, x=0, y=0, n;
+
+  n=fim;
+
+  while(n!=ini){
+    invertConvertV(n, Puzzle, &x, &y);
+    custo += Puzzle->board[x][y];
+    passos++;
+    n=sol[n];
+  }
+
+  fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+                                      Puzzle->nmoves , custo, passos);
+
+  printreverse(sol, Puzzle, ini, fim, fim, f);
+}
+
+void printreverse(int *sol, Puzzles *Puzzle, int ini, int fim, int n, FILE *f){
+  if (n!=ini){
+    printreverse(sol, Puzzle, ini, fim, sol[n], f);
+
+    int x=0, y=0;
+
+    invertConvertV(n, Puzzle, &x, &y);
+    fprintf(f, "%d %d %d\n", x, y, Puzzle->board[x][y]);
   }
 }

@@ -82,6 +82,7 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   }
   return prev;
 }
+
 int searchMin(int n, int *visited, int *price){
     int min=INFINITY, i, v;
 
