@@ -1,6 +1,5 @@
 #include "grafs.h"
 
-
 LGraph *createGraph (Puzzles *Data){
 
   Puzzles *AuxPuzzle = NULL;
@@ -82,6 +81,19 @@ int convertV(int x, int y,Puzzles *Data){
   return n;
 }
 
+void invertConvertV(int n, Puzzles *Data, int *x, int *y){
+  (*x)=0;
+  while(n >= 0){
+    if (n<Data->cols-1){
+      *y=n;
+      break;
+    }
+    n-=Data->cols;
+    (*x)++;
+  }
+
+
+}
 void freeGraph(LGraph *Data){
 
   int i=0;
@@ -145,4 +157,14 @@ void GRAPHinsertE(Graph *G, int v, int w, int weight)
   G->adj[v] = NEW(w, G->adj[v], weight);
   /*G->adj[w] = NEW(v, G->adj[w], weight);*/
   G->E++;
+}
+
+int ValidateMoveA(int x, int y, int difx, int dify, Puzzles *Data){
+  if(x+difx<0 || y+dify < 0 || x+difx>=Data->lines || y+dify>=Data->cols){
+    return 0;
+  }else if(Data->board[x+difx][y+dify]==0 || Data->board[x][y]==0){
+    return 0;
+  }else{
+    return 1;
+  }
 }

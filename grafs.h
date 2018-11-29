@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "oper.h"
+#include "define.h"
 
 typedef struct node link;
 typedef struct _graph Graph;
@@ -39,5 +40,6 @@ void freeLink(link *);
 int convertV(int , int ,Puzzles *);
 void GRAPHinsertE(Graph *, int, int, int);
 link *NEW(int , link *, int);
+int ValidateMoveA(int , int, int , int, Puzzles *);
 
 #endif
