@@ -11,6 +11,7 @@ Programado por: António da Mata nº90022
 #include "file.h"
 #include "oper.h"
 #include "grafs.h"
+#include "pqueue.h"
 
 int main(int argc, char *argv[]){
 
@@ -18,8 +19,8 @@ int main(int argc, char *argv[]){
   Puzzles *Puzzle = NULL;
   Sol *Solutions = NULL;
   LGraph *Graphs = NULL;
-
-  int i=0;
+  int *sol=NULL;
+  int i=0, f=0, n=0;
 
   if (argc != 2) {
     exit(0);
@@ -28,6 +29,15 @@ int main(int argc, char *argv[]){
   Puzzle = readFile(argv[1]);
   Solutions = mainOper(Puzzle);
   Graphs = createGraph(Puzzle);
+  i=convertV(Puzzle->Positions->line, Puzzle->Positions->col, Puzzle);
+  f=convertV(Puzzle->Positions->nPos->line, Puzzle->Positions->nPos->col, Puzzle);
+  sol=searchPath(Graphs->G, iniPQ(Graphs->G), i, f);
+
+  n=f;
+  while(n!=i){
+    printf("%d\n", sol[n]);
+    n=sol[n];
+  }
 
   fOut = createFileSol(argv[1]);
   printSolutions(fOut, Graphs);

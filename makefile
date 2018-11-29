@@ -6,10 +6,10 @@ CC = gcc
 CFLAGS = -Wall -ansi -std=c99 -g
 
 #  Sources
-SOURCES =  main.c file.c list.c oper.c grafs.c
+SOURCES =  main.c file.c list.c oper.c grafs.c pqueue.c
 
 #  Objects
-OBJECTS = main.o file.o list.o oper.o grafs.o
+OBJECTS = main.o file.o list.o oper.o grafs.o pqueue.o
 
 %.o: %.c
 
@@ -26,6 +26,9 @@ oper.o : oper.h oper.c
 	$(CC) -g -c oper.c
 grafs.o : grafs.h grafs.c
 	$(CC) -g -c grafs.c
+pqueue.o : pqueue.h pqueue.c
+	$(CC) -g -c pqueue.c
+
 clean::
 	rm -f *.o *.valid core a.out tuktuk *~
 
