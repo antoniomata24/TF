@@ -22,6 +22,7 @@ PQueue **iniPQ(Graph *);
 int *searchPath(Graph *, PQueue **, int , int );
 int searchMin(int , int *, int *);
 int vEmpty(int *, int );
+void freePQ(PQueue **, Graph *);
 
 
 #endif

@@ -98,13 +98,13 @@ FILE *createFileSol(char *nomef){
   int len = 0;
 
   string = (char*)calloc(1, (strlen(nomef) - strlen(".cities") +
-                                          strlen(".valid") + 1)*sizeof(char));
+                                          strlen(".walks") + 1)*sizeof(char));
   if (string == NULL)
     exit(0);
 
   len = strlen(nomef)-strlen(".cities");
   strncpy(string, nomef, len);
-  strcat(string, ".valid");
+  strcat(string, ".walks");
 
   f1=fopen(string, "w");
   if(f1==NULL)
@@ -140,6 +140,13 @@ void printSolutions(FILE *f, LGraph *Graphs, int *sol, Puzzles *Puzzle, int ini,
   int custo=0, passos=0, x=0, y=0, n;
 
   n=fim;
+  if (sol == NULL){
+    custo = -1;
+    passos = 0;
+    fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+                                        Puzzle->nmoves , custo, passos);
+    return;
+  }
 
   while(n!=ini){
     invertConvertV(n, Puzzle, &x, &y);

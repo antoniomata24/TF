@@ -38,8 +38,9 @@ int main(int argc, char *argv[]){
   printSolutions(fOut, Graphs, sol, Puzzle, i, f);
 
   /*freeSolution(Solutions);*/
-  freeAllPuzzle(Puzzle);
+  freePQ(Queue, Graphs->G);
   freeGraph(Graphs);
+  freeAllPuzzle(Puzzle);
   free(sol);
   fclose(fOut);
 

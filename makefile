@@ -32,7 +32,7 @@ pqueue.o : pqueue.h pqueue.c
 	$(CC) -g -c pqueue.c
 
 clean::
-	rm -f *.o *.valid core a.out tuktuk *~
+	rm -f *.o *.walks core a.out tuktuk *~
 
 depend::
 	makedepend $(SOURCES)
