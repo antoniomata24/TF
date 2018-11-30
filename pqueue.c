@@ -36,6 +36,8 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   int i=0, visitedP =0, v=0, pmin=INFINITY, u=0, tPrice=0;
   link *aux =NULL;
 
+  if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
+
   price=(int *)malloc(G->V*sizeof(int));
   if(price == NULL) exit(0);
 
@@ -70,16 +72,22 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
     visited[v]=1;
 
     while(aux!=NULL){
-          if(price[aux->v]>aux->weight+price[v]){
-            price[aux->v]=aux->weight+price[v];
-            prev[aux->v]=v;
-          }
+
+      if(price[aux->v]>aux->weight+price[v]){
+        price[aux->v]=aux->weight+price[v];
+        prev[aux->v]=v;
+      }
 
       aux=aux->next;
     }
-    if(prev[dest]!=-1)
-        return prev;
+    if(prev[dest]!=-1){
+      free(visited);
+      free(price);
+      return prev;
+    }
   }
+  free(visited);
+  free(price);
   return prev;
 }
 
@@ -103,4 +111,13 @@ int vEmpty(int *Data, int n){
             return 0;
     }
     return 1;
+}
+
+void freePQ(PQueue **Data, Graph *G){
+  int i;
+
+  for(i=0; i<G->V; i++)
+    free(Data[i]);
+
+  free(Data);
 }
