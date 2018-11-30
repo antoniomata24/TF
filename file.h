@@ -6,7 +6,9 @@
 
 Puzzles *readFile(char *);
 FILE *createFileSol(char *);
-void printSolutions(FILE *, LGraph *, int *, Puzzles *, int, int);
-void printreverse(int *sol, Puzzles *Puzzle, int ini, int fim, int n, FILE *f);
+void printSolutions(FILE *, int *, Puzzles *, int, int);
+void printSolutionsB(FILE *, int *, Puzzles *, int, int, int, int);
+void printSolutionsBSteps(FILE *, int *, Puzzles *, int, int);
+void printreverse(int *, Puzzles *, int , int , int , FILE *);
 
 #endif

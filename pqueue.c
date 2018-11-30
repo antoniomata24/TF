@@ -1,4 +1,118 @@
 #include "pqueue.h"
+#include "file.h"
+
+void mainPQ(Puzzles *Data, FILE *f){
+  int * new_sol = NULL, *iniB =NULL, *fimB = NULL;
+  int **new_solB = NULL;
+  PQueue **Queue = NULL;
+  Puzzles *AuxP = NULL;
+  Pos *AuxPos = NULL;
+  LGraph *Graphs = NULL, *AuxG = NULL, *NewG = NULL;
+  int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y;
+
+  AuxP = Data;
+  if (AuxP == NULL) exit(0);
+
+  while (AuxP!=NULL){
+    AuxPos = AuxP->Positions;
+    NewG = createGraph(AuxP);
+    contador = 0;
+
+    switch (Data->mode) {
+      case 'A':
+
+        ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
+        fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
+        new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
+        printSolutions(f, new_sol, AuxP, ini, fim);
+
+        freePQ(Queue, NewG->G);
+        free(new_sol);
+
+        break;
+
+      case 'B':
+        new_solB = (int**)malloc(AuxP->nmoves*sizeof(int*));
+        if (new_solB==NULL) exit(0);
+        iniB = (int*)malloc(AuxP->nmoves*sizeof(int));
+        if (iniB==NULL) exit(0);
+        fimB = (int*)malloc(AuxP->nmoves*sizeof(int));
+        if (fimB==NULL) exit(0);
+
+        contador=0;
+        custo=0;
+        passos=0;
+
+        while (AuxPos->nPos!=NULL){
+          new_solB[contador]=NULL;
+          iniB[contador]=convertV(AuxPos->line, AuxPos->col, AuxP);
+          fimB[contador]=convertV(AuxPos->nPos->line, AuxPos->nPos->col, AuxP);
+          new_solB[contador]=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), iniB[contador], fimB[contador]);
+
+          AuxPos = AuxPos->nPos;
+          contador++;
+        }
+
+        for (contador=0; contador<AuxP->nmoves-1; contador++){
+          if(new_solB[contador]==NULL) exit(0);
+        }
+
+        for (contador = (AuxP->nmoves)-2; contador >= 0; contador--){
+          n = fimB[contador];
+          while(n!=iniB[contador]){
+            invertConvertV(n, AuxP, &x, &y);
+            custo += AuxP->board[x][y];
+            passos++;
+            n = new_solB[contador][n];
+          }
+        }
+
+        for (contador=0; contador<AuxP->nmoves-1; contador++){
+          if (contador == 0){
+            printSolutionsB(f, new_solB[contador], AuxP, iniB[contador], fimB[contador], custo, passos);
+            printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+          } else {
+            printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+          }
+        }
+        fprintf(f,"\n");
+
+        freePQ(Queue, NewG->G);
+        for (i=0; i<=contador; i++){
+          free(new_solB[i]);
+        }
+        free(new_solB);
+        free(iniB);
+        free(fimB);
+        break;
+
+      default:
+
+        ini=convertV(AuxPos->line, AuxPos->col, AuxP);
+        fim=convertV(AuxPos->nPos->line, AuxPos->nPos->col, AuxP);
+        new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
+
+        printSolutions(f, new_sol, AuxP, ini, fim);
+
+        freePQ(Queue, NewG->G);
+        free(new_sol);
+
+        break;
+    }
+
+
+    if(Graphs==NULL){
+      Graphs=NewG;
+      AuxG=Graphs;
+    } else {
+      AuxG->n=NewG;
+    }
+    AuxG=NewG;
+    AuxP=AuxP->nPuzzle;
+  }
+
+  freeGraph(Graphs);
+}
 
 PQueue **iniPQ(Graph *G){
   PQueue **New = NULL;
@@ -63,6 +177,10 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
 
   visitedP = G->V-1;
   v=source;
+
+  if (source==dest){
+    return prev;
+  }
 
   while (vEmpty(visited, G->V)==0){
     pmin=INFINITY;
