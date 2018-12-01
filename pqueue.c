@@ -94,9 +94,7 @@ void mainPQ(Puzzles *Data, FILE *f){
 
         NewG = createGraph(AuxP);
         AllPoints = convertAllPoints(AuxP);
-
         searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
-
         printSolutionsC(f, new_solC, AuxP);
 
         freePQ(Queue, NewG->G);
@@ -277,7 +275,7 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
     AuxE=AuxPoints->data;
     AuxPoints=AuxPoints->next;
   }
-  
+
   if(Point==NULL){
     free(prev);
     free(visited);
