@@ -17,12 +17,12 @@ void mainPQ(Puzzles *Data, FILE *f){
 
   while (AuxP!=NULL){
     AuxPos = AuxP->Positions;
+    NewG = createGraph(AuxP);
     contador = 0;
 
     switch (AuxP->mode) {
       case 'A':
 
-        NewG = createGraph(AuxP);
         ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
         fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
         new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
@@ -35,7 +35,6 @@ void mainPQ(Puzzles *Data, FILE *f){
 
       case 'B':
 
-        NewG = createGraph(AuxP);
         new_solB = (int**)malloc(AuxP->nmoves*sizeof(int*));
         if (new_solB==NULL) exit(0);
         iniB = (int*)malloc(AuxP->nmoves*sizeof(int));
@@ -92,19 +91,18 @@ void mainPQ(Puzzles *Data, FILE *f){
 
       case 'C':
 
-        NewG = createGraph(AuxP);
         AllPoints = convertAllPoints(AuxP);
 
         searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
 
         printSolutionsC(f, new_solC, AuxP);
 
+
         freePQ(Queue, NewG->G);
         freelList(new_solC);
         break;
 
       default:
-        NewG = createGraph(AuxP);
         printSolutions(f, NULL, AuxP, 0, 0);
         break;
     }
@@ -367,8 +365,9 @@ int vEmpty(int *Data, int n){
 void freePQ(PQueue **Data, Graph *G){
   int i;
 
-  for(i=0; i<G->V; i++)
+  for(i=0; i<G->V; i++){
     free(Data[i]);
+  }
 
   free(Data);
 }
