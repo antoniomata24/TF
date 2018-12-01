@@ -84,14 +84,13 @@ int convertV(int x, int y,Puzzles *Data){
 void invertConvertV(int n, Puzzles *Data, int *x, int *y){
   (*x)=0;
   while(n >= 0){
-    if (n<Data->cols-1){
-      *y=n;
+    if (n<=Data->cols-1){
+      (*y)=n;
       break;
     }
     n-=Data->cols;
     (*x)++;
   }
-
 
 }
 void freeGraph(LGraph *Data){
@@ -155,7 +154,6 @@ Graph *GRAPHinit(int V)
 void GRAPHinsertE(Graph *G, int v, int w, int weight)
 {
   G->adj[v] = NEW(w, G->adj[v], weight);
-  /*G->adj[w] = NEW(v, G->adj[w], weight);*/
   G->E++;
 }
 
