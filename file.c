@@ -148,6 +148,14 @@ void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
   Edge *AuxE=NULL;
   lList *AuxL = Sol;
 
+  if (Sol == NULL){
+    custo = -1;
+    passos = 0;
+    fprintf(f, "%d %d %c %d %d %d\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+                                      Puzzle->nmoves , custo, passos);
+    return;
+  }
+  
   while(AuxL!=NULL){
     AuxE=AuxL->data;
     invertConvertV(AuxE->v, Puzzle, &x, &y);
