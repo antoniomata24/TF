@@ -18,40 +18,43 @@ LGraph *createGraph (Puzzles *Data){
     if(AuxG==NULL)
       exit(0);
 
-    for(i=0; i<Data->lines; i++){
-      for(j=0; j<Data->cols; j++){
-        vi=convertV(i, j, Data);
-        if(ValidateMoveA(i, j, 1, 2, Data)==1){
-          vf=convertV(i+1, j+2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j+2]);
-        }
-        if(ValidateMoveA(i, j, 1, -2, Data)==1){
-          vf=convertV(i+1, j-2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j-2]);
-        }
-        if(ValidateMoveA(i, j, -1, 2, Data)==1){
-          vf=convertV(i-1, j+2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j+2]);
-        }
-        if(ValidateMoveA(i, j, -1, -2, Data)==1){
-          vf=convertV(i-1, j-2, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j-2]);
-        }
-        if(ValidateMoveA(i, j, 2, 1, Data)==1){
-          vf=convertV(i+2, j+1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j+1]);
-        }
-        if(ValidateMoveA(i, j, 2, -1, Data)==1){
-          vf=convertV(i+2, j-1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j-1]);
-        }
-        if(ValidateMoveA(i, j, -2, 1, Data)==1){
-          vf=convertV(i-2, j+1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j+1]);
-        }
-        if(ValidateMoveA(i, j, -2, -1, Data)==1){
-          vf=convertV(i-2, j-1, Data);
-          GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j-1]);
+    if(Data->mode=='A' || Data->mode=='B' || Data->mode=='C'){
+
+      for(i=0; i<Data->lines; i++){
+        for(j=0; j<Data->cols; j++){
+          vi=convertV(i, j, Data);
+          if(ValidateMoveA(i, j, 1, 2, Data)==1){
+            vf=convertV(i+1, j+2, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j+2]);
+          }
+          if(ValidateMoveA(i, j, 1, -2, Data)==1){
+            vf=convertV(i+1, j-2, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j-2]);
+          }
+          if(ValidateMoveA(i, j, -1, 2, Data)==1){
+            vf=convertV(i-1, j+2, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j+2]);
+          }
+          if(ValidateMoveA(i, j, -1, -2, Data)==1){
+            vf=convertV(i-1, j-2, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j-2]);
+          }
+          if(ValidateMoveA(i, j, 2, 1, Data)==1){
+            vf=convertV(i+2, j+1, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j+1]);
+          }
+          if(ValidateMoveA(i, j, 2, -1, Data)==1){
+            vf=convertV(i+2, j-1, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j-1]);
+          }
+          if(ValidateMoveA(i, j, -2, 1, Data)==1){
+            vf=convertV(i-2, j+1, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j+1]);
+          }
+          if(ValidateMoveA(i, j, -2, -1, Data)==1){
+            vf=convertV(i-2, j-1, Data);
+            GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j-1]);
+          }
         }
       }
     }
@@ -82,16 +85,8 @@ int convertV(int x, int y,Puzzles *Data){
 }
 
 void invertConvertV(int n, Puzzles *Data, int *x, int *y){
-  (*x)=0;
-  while(n >= 0){
-    if (n<=Data->cols-1){
-      (*y)=n;
-      break;
-    }
-    n-=Data->cols;
-    (*x)++;
-  }
-
+  (*x)=n/Data->cols;
+  (*y)=n-(*x)*Data->cols;
 }
 void freeGraph(LGraph *Data){
 
