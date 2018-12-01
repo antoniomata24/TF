@@ -10,7 +10,7 @@ void mainPQ(Puzzles *Data, FILE *f){
   Pos *AuxPos = NULL;
   lList *AllPoints = NULL, *new_solC=NULL;
   LGraph *Graphs = NULL, *AuxG = NULL, *NewG = NULL;
-  int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y;
+  int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
 
   AuxP = Data;
   if (AuxP == NULL) exit(0);
@@ -35,50 +35,56 @@ void mainPQ(Puzzles *Data, FILE *f){
 
       case 'B':
 
-        new_solB = (int**)malloc(AuxP->nmoves*sizeof(int*));
+        new_solB = (int**)malloc((AuxP->nmoves)*sizeof(int*));
         if (new_solB==NULL) exit(0);
-        iniB = (int*)malloc(AuxP->nmoves*sizeof(int));
+        iniB = (int*)malloc((AuxP->nmoves)*sizeof(int));
         if (iniB==NULL) exit(0);
-        fimB = (int*)malloc(AuxP->nmoves*sizeof(int));
+        fimB = (int*)malloc((AuxP->nmoves)*sizeof(int));
         if (fimB==NULL) exit(0);
 
         contador=0;
         custo=0;
         passos=0;
+        inv=0;
 
         while (AuxPos->nPos!=NULL){
           new_solB[contador]=NULL;
           iniB[contador]=convertV(AuxPos->line, AuxPos->col, AuxP);
           fimB[contador]=convertV(AuxPos->nPos->line, AuxPos->nPos->col, AuxP);
           new_solB[contador]=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), iniB[contador], fimB[contador]);
-
+          if(new_solB[contador]==NULL) break;
           AuxPos = AuxPos->nPos;
           contador++;
         }
 
         for (contador=0; contador<AuxP->nmoves-1; contador++){
-          if(new_solB[contador]==NULL) exit(0);
-        }
-
-        for (contador = (AuxP->nmoves)-2; contador >= 0; contador--){
-          n = fimB[contador];
-          while(n!=iniB[contador]){
-            invertConvertV(n, AuxP, &x, &y);
-            custo += AuxP->board[x][y];
-            passos++;
-            n = new_solB[contador][n];
+          if(new_solB[contador]==NULL) {
+            printSolutions(f, NULL, AuxP, 0, 0);
+            inv=1;
+            break;
           }
         }
 
-        for (contador=0; contador<AuxP->nmoves-1; contador++){
-          if (contador == 0){
-            printSolutionsB(f, new_solB[contador], AuxP, iniB[contador], fimB[contador], custo, passos);
-            printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
-          } else {
-            printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+        if(inv==0){
+          for (contador = (AuxP->nmoves)-2; contador >= 0; contador--){
+            n = fimB[contador];
+            while(n!=iniB[contador]){
+              invertConvertV(n, AuxP, &x, &y);
+              custo += AuxP->board[x][y];
+              passos++;
+              n = new_solB[contador][n];
+            }
           }
+          for (contador=0; contador<AuxP->nmoves-1; contador++){
+            if (contador == 0){
+              printSolutionsB(f, new_solB[contador], AuxP, iniB[contador], fimB[contador], custo, passos);
+              printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+            } else {
+              printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+            }
+          }
+          fprintf(f,"\n");
         }
-        fprintf(f,"\n");
 
         freePQ(Queue, NewG->G);
         for (i=0; i<AuxP->nmoves-1; i++){
