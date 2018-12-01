@@ -8,6 +8,8 @@ Puzzles *readFile(char *);
 FILE *createFileSol(char *);
 void printSolutions(FILE *, int *, Puzzles *, int, int);
 void printSolutionsB(FILE *, int *, Puzzles *, int, int, int, int);
+void printSolutionsC(FILE *, lList *, Puzzles *);
+void printPathList(lList *, Puzzles *, FILE *);
 void printSolutionsBSteps(FILE *, int *, Puzzles *, int, int);
 void printreverse(int *, Puzzles *, int , int , int , FILE *);
 

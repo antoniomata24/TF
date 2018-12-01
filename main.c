@@ -16,7 +16,6 @@ int main(int argc, char *argv[]){
 
   FILE *fOut = NULL;
   Puzzles *Puzzle = NULL;
-  PQueue **Queue = NULL;
 
   if (argc != 2) {
     exit(0);
