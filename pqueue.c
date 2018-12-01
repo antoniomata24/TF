@@ -17,12 +17,12 @@ void mainPQ(Puzzles *Data, FILE *f){
 
   while (AuxP!=NULL){
     AuxPos = AuxP->Positions;
-    NewG = createGraph(AuxP);
     contador = 0;
 
-    switch (Data->mode) {
+    switch (AuxP->mode) {
       case 'A':
 
+        NewG = createGraph(AuxP);
         ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
         fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
         new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
@@ -34,6 +34,8 @@ void mainPQ(Puzzles *Data, FILE *f){
         break;
 
       case 'B':
+
+        NewG = createGraph(AuxP);
         new_solB = (int**)malloc(AuxP->nmoves*sizeof(int*));
         if (new_solB==NULL) exit(0);
         iniB = (int*)malloc(AuxP->nmoves*sizeof(int));
@@ -80,7 +82,7 @@ void mainPQ(Puzzles *Data, FILE *f){
         fprintf(f,"\n");
 
         freePQ(Queue, NewG->G);
-        for (i=0; i<=contador; i++){
+        for (i=0; i<AuxP->nmoves-1; i++){
           free(new_solB[i]);
         }
         free(new_solB);
@@ -90,15 +92,20 @@ void mainPQ(Puzzles *Data, FILE *f){
 
       case 'C':
 
+        NewG = createGraph(AuxP);
         AllPoints = convertAllPoints(AuxP);
 
         searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
 
         printSolutionsC(f, new_solC, AuxP);
 
-        freelList(new_solC);
         freePQ(Queue, NewG->G);
+        freelList(new_solC);
+        break;
 
+      default:
+        NewG = createGraph(AuxP);
+        printSolutions(f, NULL, AuxP, 0, 0);
         break;
     }
 
@@ -297,7 +304,6 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
       if(prev[AuxE->v]!=-1){
         addPathSol(prev, FullPath, G, prevS, AuxE->v);
         prevS=AuxE->v;
-        printf("To delete-> %d\n", prevS);
         searchPathC(G, Q, &Point, FullPath, AuxE);
         free(prev);
         free(visited);
