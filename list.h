@@ -10,8 +10,9 @@ struct _lList{
   lList *next;
 };
 
-lList *InsertListNode(lList *, Item);
-lList *freeNode(Item , lList *);
+void InsertListNode(lList **, Item);
+void freeNode(Item , lList **);
+void freelList(lList *);
 void freeAllPuzzle(Puzzles *);
 void freePosition(Pos *);
 void freeSolution(Sol *);

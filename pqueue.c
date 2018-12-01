@@ -92,12 +92,12 @@ void mainPQ(Puzzles *Data, FILE *f){
 
         AllPoints = convertAllPoints(AuxP);
 
-        new_solC=searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), AllPoints);
+        searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
 
-        printSolutions(f, new_sol, AuxP, ini, fim);
+        printSolutionsC(f, new_solC, AuxP);
 
+        freelList(new_solC);
         freePQ(Queue, NewG->G);
-        free(new_sol);
 
         break;
     }
@@ -123,11 +123,12 @@ lList *convertAllPoints(Puzzles *AuxP){
   Pos *AuxPos=NULL;
   AuxPos = AuxP->Positions;
 
-  while (AuxPos!=NULL) {
+  while (AuxPos!=NULL){
     AuxE=(Edge *)malloc(sizeof(Edge));
     AuxE->v=convertV(AuxPos->line, AuxPos->col, AuxP);
     AuxE->w=AuxP->board[AuxPos->line][AuxPos->col];
-    lPoints=InsertListNode(lPoints, AuxE);
+    InsertListNode(&lPoints, AuxE);
+    AuxPos=AuxPos->nPos;
   }
   return lPoints;
 }
@@ -165,7 +166,7 @@ PQueue **iniPQ(Graph *G){
 int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   int *price = NULL;
   int *prev = NULL, *visited = NULL;
-  int i=0, visitedP =0, v=0, pmin=INFINITY, u=0, tPrice=0;
+  int i=0, v=0;
   link *aux =NULL;
 
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
@@ -192,8 +193,6 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   }
 
   price[source]=0;
-
-  visitedP = G->V-1;
   v=source;
 
   if (source==dest){
@@ -201,7 +200,6 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   }
 
   while (vEmpty(visited, G->V)==0){
-    pmin=INFINITY;
 
     v=searchMin(G->V, visited, price);
     aux=Q[v]->adj;
@@ -227,55 +225,62 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   return prev;
 }
 
-lList *searchPathC(Graph *G, PQueue **Q, lList *AllPoints){
+void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge *ESource){
   int *price = NULL;
   int *prev = NULL, *visited = NULL;
-  int i=0, visitedP =0, v=0, pmin=INFINITY, u=0, tPrice=0, prevS=0;
+  int i=0, v=0, prevS=0;
   link *aux =NULL;
-  lList *Point = AllPoints;
-  lList *AuxPoints = AllPoints;
-  lList *FinalPath = NULL;
+  lList *Point = *AllPoints;
+  lList *AuxPoints = *AllPoints;
+  lList *FinalPath = *FullPath;
   Edge *AuxE=NULL;
+
+  if(AllPoints==NULL)
+    return;
+
   AuxE=Point->data;
-  if(G->adj[AuxE->v]==NULL) return NULL;
+
+
+  if(G->adj[AuxE->v]==NULL) return;
 
   price=(int *)malloc(G->V*sizeof(int));
   if(price == NULL) exit(0);
-
   for(i=0; i<G->V; i++){
     price[i]=INFINITY;
   }
 
   visited=(int *)malloc(G->V*sizeof(int));
   if(visited == NULL) exit(0);
-
   for(i=0; i<G->V; i++){
     visited[i]=0;
   }
 
   prev=(int *)malloc(G->V*sizeof(int));
   if(prev == NULL) exit(0);
-
   for(i=0; i<G->V; i++){
     prev[i]=-1;
   }
 
-
+  AuxE=ESource;
   price[AuxE->v]=0;
-
-  visitedP = G->V-1;
   v=AuxE->v;
-  freeNode(AuxE, Point);
   prevS=v;
+  freeNode(AuxE, &Point);
 
 
-  while (Point!=NULL&&vEmpty(visited, G->V)==0){
-    pmin=INFINITY;
+  while(AuxPoints!=NULL){
+    AuxE=AuxPoints->data;
+    AuxPoints=AuxPoints->next;
+  }
+  if(Point==NULL){
+    return;
+  }
+
+  while(Point!=NULL||vEmpty(visited, G->V)==0){
 
     v=searchMin(G->V, visited, price);
     aux=Q[v]->adj;
     visited[v]=1;
-
 
     while(aux!=NULL){
 
@@ -286,33 +291,49 @@ lList *searchPathC(Graph *G, PQueue **Q, lList *AllPoints){
 
       aux=aux->next;
     }
-
-    while (AuxPoints!=NULL) {
+    AuxPoints=Point;
+    while (AuxPoints!=NULL){
       AuxE=AuxPoints->data;
       if(prev[AuxE->v]!=-1){
-        FinalPath=addPathSol(prev, FinalPath, G, prevS, AuxE->v);
+        addPathSol(prev, FullPath, G, prevS, AuxE->v);
         prevS=AuxE->v;
-        freeNode(AuxE, Point);
+        printf("To delete-> %d\n", prevS);
+        searchPathC(G, Q, &Point, FullPath, AuxE);
+        free(prev);
+        free(visited);
+        free(price);
+        return;
       }
+      AuxPoints=AuxPoints->next;
     }
   }
+  free(prev);
   free(visited);
   free(price);
-  return FinalPath;
+  return;
 }
 
-lList *addPathSol(int *prev, lList *Path, Graph *G, int source, int n){
+void addPathPoint(lList **Path, Graph *G, int n){
   Edge *New = NULL;
-  lList *NewList = Path;
-  while (n!=source) {
-    New=(Edge *)malloc(sizeof(Edge));
-    New->v=prev[n];
+  lList *NewList = *Path;
+   New=(Edge *)malloc(sizeof(Edge));
+    New->v=n;
     New->w=0;
-    NewList=InsertListNode(NewList, New);
-    n=prev[n];
-  }
+    InsertListNode(&NewList, New);
+    *Path=NewList;
+}
 
-  return NewList;
+void addPathSol(int *prev, lList **Path, Graph *G, int source, int n){
+  Edge *New = NULL;
+  lList *NewList = *Path;
+
+  if(n==source)
+    return;
+
+  addPathSol(prev, Path, G, source, prev[n]);
+  addPathPoint(Path, G, n);
+
+  return;
 }
 
 int searchMin(int n, int *visited, int *price){

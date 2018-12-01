@@ -12,8 +12,9 @@ struct _PQueue{
   link *adj;
 };
 
-lList *searchPathC(Graph *, PQueue **, lList *);
-lList *addPathSol(int *, lList *, Graph *, int , int );
+void searchPathC(Graph *, PQueue **, lList **, lList **, Edge *);
+void addPathSol(int *, lList **, Graph *, int , int );
+void addPathPoint(lList **, Graph *, int );
 lList seachNode(Item, lList *);
 lList *convertAllPoints(Puzzles *);
 void mainPQ(Puzzles *, FILE *);
