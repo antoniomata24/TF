@@ -3,6 +3,7 @@
 
 #include "define.h"
 #include "grafs.h"
+#include "list.h"
 
 typedef struct _PQueue PQueue;
 
@@ -11,6 +12,10 @@ struct _PQueue{
   link *adj;
 };
 
+lList *searchPathC(Graph *, PQueue **, lList *);
+lList *addPathSol(int *, lList *, Graph *, int , int );
+lList seachNode(Item, lList *);
+lList *convertAllPoints(Puzzles *);
 void mainPQ(Puzzles *, FILE *);
 PQueue **iniPQ(Graph *);
 int *searchPath(Graph *, PQueue **, int , int );
