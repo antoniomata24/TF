@@ -92,9 +92,7 @@ void mainPQ(Puzzles *Data, FILE *f){
       case 'C':
 
         AllPoints = convertAllPoints(AuxP);
-
         searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
-
         printSolutionsC(f, new_solC, AuxP);
 
 
@@ -244,8 +242,6 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
     return;
 
   AuxE=Point->data;
-
-
   if(G->adj[AuxE->v]==NULL) return;
 
   price=(int *)malloc(G->V*sizeof(int));
@@ -271,13 +267,17 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
   v=AuxE->v;
   prevS=v;
   freeNode(AuxE, &Point);
-
+  AuxPoints=Point;
 
   while(AuxPoints!=NULL){
     AuxE=AuxPoints->data;
     AuxPoints=AuxPoints->next;
   }
+
   if(Point==NULL){
+    free(prev);
+    free(visited);
+    free(price);
     return;
   }
 
@@ -342,14 +342,12 @@ void addPathSol(int *prev, lList **Path, Graph *G, int source, int n){
 
 int searchMin(int n, int *visited, int *price){
     int min=INFINITY, i, v;
-
     for(i=0; i<n; i++){
         if(price[i]<min&&visited[i]==0){
             min=price[i];
             v=i;
         }
     }
-
     return v;
 }
 

@@ -13,12 +13,12 @@ void freelList(lList *DataOut){
 
 void InsertListNode(lList **ListIn ,Item DataIn){
   lList *New=NULL;
-  lList *First = *ListIn, *Aux=*ListIn;
+  lList *Aux=*ListIn;
 
-  New=(lList *)malloc(sizeof(lList));
+  New=(lList *)malloc(sizeof(lList ));
   New->data=DataIn;
   New->next=NULL;
-  if(First==NULL)
+  if(Aux==NULL)
      *ListIn=New;
   else{
     while(Aux->next!=NULL)
@@ -38,6 +38,7 @@ void freeNode(Item DataOut, lList **First){
       if (Aux!=NULL && Aux->next==NULL &&Aux->data==DataOut) {
         free(Aux->data);
         free(Aux);
+        *First=NULL;
         return;
       }
 
