@@ -1,6 +1,56 @@
 #include "list.h"
 #include "define.h"
 
+void freelList(lList *DataOut){
+
+  if(DataOut==NULL)
+    return;
+
+  freelList(DataOut->next);
+  free(DataOut->data);
+  free(DataOut);
+}
+
+void InsertListNode(lList **ListIn ,Item DataIn){
+  lList *New=NULL;
+  lList *First = *ListIn, *Aux=*ListIn;
+
+  New=(lList *)malloc(sizeof(lList));
+  New->data=DataIn;
+  New->next=NULL;
+  if(First==NULL)
+     *ListIn=New;
+  else{
+    while(Aux->next!=NULL)
+      Aux=Aux->next;
+    Aux->next=New;
+  }
+}
+
+void freeNode(Item DataOut, lList **First){
+  lList *Aux = *First;
+  lList *Prev = NULL;
+  if (Aux!=NULL && Aux->data==DataOut) {
+    *First=Aux->next;
+    free(Aux->data);
+    free(Aux);
+  }else{
+      if (Aux!=NULL && Aux->next==NULL &&Aux->data==DataOut) {
+        free(Aux->data);
+        free(Aux);
+        return;
+      }
+
+      while (Aux!=NULL&&Aux->data!=DataOut) {
+        Prev=Aux;
+        Aux=Aux->next;
+      }
+      Prev->next=Aux->next;
+      free(Aux->data);
+      free(Aux);
+  }
+}
+
 void freeAllPuzzle(Puzzles *Data){
   if(Data == NULL)
     return;

@@ -3,21 +3,21 @@
 
 #include "define.h"
 #include "grafs.h"
+#include "list.h"
 
 typedef struct _PQueue PQueue;
-/*typedef struct _path Path;*/
 
 struct _PQueue{
   int v;
   link *adj;
 };
 
-/*struct _path{
-  int *points;
-  int *price;
-  int tprice;
-};*/
-
+void searchPathC(Graph *, PQueue **, lList **, lList **, Edge *);
+void addPathSol(int *, lList **, Graph *, int , int );
+void addPathPoint(lList **, Graph *, int );
+lList seachNode(Item, lList *);
+lList *convertAllPoints(Puzzles *);
+void mainPQ(Puzzles *, FILE *);
 PQueue **iniPQ(Graph *);
 int *searchPath(Graph *, PQueue **, int , int );
 int searchMin(int , int *, int *);
