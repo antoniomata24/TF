@@ -15,7 +15,6 @@ void mainOper(Puzzles *Data, FILE *f){
 
   while (AuxP!=NULL){
     AuxPos = AuxP->Positions;
-    NewG=NULL;
     NewG = createGraph(AuxP);
     contador = 0;
 
@@ -102,8 +101,6 @@ void mainOper(Puzzles *Data, FILE *f){
 
         if(validateAllPoints(AuxP)==0){
             printSolutions(f, NULL, AuxP, 0, 0);
-            freePQ(Queue, NewG->G);
-            freelList(new_solC);
         }else{
           AllPoints = convertAllPoints(AuxP);
           searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
@@ -135,7 +132,7 @@ int validateAllPoints(Puzzles *AuxP){
 
     Pos *AuxPos=AuxP->Positions;
     while(AuxPos!=NULL){
-        if(AuxPos->col>=AuxP->cols||AuxPos->line>=AuxP->lines)
+        if(AuxPos->col>=AuxP->cols||AuxPos->line>=AuxP->lines||AuxPos->line<0||AuxPos->col<0)
             return 0;
         if(AuxP->board[AuxPos->line][AuxPos->col]==0)
             return 0;
