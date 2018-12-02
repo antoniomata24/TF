@@ -1,163 +1,395 @@
 #include "oper.h"
 
-Sol *mainOper(Puzzles *Data){
+void mainOper(Puzzles *Data, FILE *f){
+  int * new_sol = NULL, *iniB =NULL, *fimB = NULL;
+  int **new_solB = NULL;
+  PQueue **Queue = NULL;
   Puzzles *AuxP = NULL;
-  AuxP=Data;
-  Sol *AllSol = NULL;
-  Sol *NewSol = NULL;
-  Sol *AuxSol = NULL;
+  Pos *AuxPos = NULL;
+  lList *AllPoints = NULL, *new_solC=NULL;
+  LGraph *Graphs = NULL, *AuxG = NULL, *NewG = NULL;
+  int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
 
-  if(AuxP == NULL){
-    exit(0);
-  }
+  AuxP = Data;
+  if (AuxP == NULL) exit(0);
 
-  while(AuxP!=NULL){
-    switch(AuxP->mode){
+  while (AuxP!=NULL){
+    AuxPos = AuxP->Positions;
+    NewG=NULL;
+    NewG = createGraph(AuxP);
+    contador = 0;
+
+    switch (AuxP->mode) {
       case 'A':
-        NewSol = operA(AuxP);
+
+        ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
+        fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
+        new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
+        printSolutions(f, new_sol, AuxP, ini, fim);
+
+        freePQ(Queue, NewG->G);
+        free(new_sol);
+
         break;
+
       case 'B':
-        NewSol = operB(AuxP);
+
+        new_solB = (int**)malloc((AuxP->nmoves)*sizeof(int*));
+        if (new_solB==NULL) exit(0);
+        iniB = (int*)malloc((AuxP->nmoves)*sizeof(int));
+        if (iniB==NULL) exit(0);
+        fimB = (int*)malloc((AuxP->nmoves)*sizeof(int));
+        if (fimB==NULL) exit(0);
+
+        contador=0;
+        custo=0;
+        passos=0;
+        inv=0;
+        int tallocs=0;
+
+        while (AuxPos->nPos!=NULL){
+          new_solB[contador]=NULL;
+          iniB[contador]=convertV(AuxPos->line, AuxPos->col, AuxP);
+          fimB[contador]=convertV(AuxPos->nPos->line, AuxPos->nPos->col, AuxP);
+          new_solB[contador]=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), iniB[contador], fimB[contador]);
+          freePQ(Queue, NewG->G);
+          if(new_solB[contador]==NULL) break;
+          AuxPos = AuxPos->nPos;
+          contador++;
+          tallocs++;
+        }
+
+        for (contador=0; contador<AuxP->nmoves-1; contador++){
+          if(new_solB[contador]==NULL) {
+            printSolutions(f, NULL, AuxP, 0, 0);
+            inv=1;
+            break;
+          }
+        }
+
+        if(inv==0){
+          for (contador = (AuxP->nmoves)-2; contador >= 0; contador--){
+            n = fimB[contador];
+            while(n!=iniB[contador]){
+              invertConvertV(n, AuxP, &x, &y);
+              custo += AuxP->board[x][y];
+              passos++;
+              n = new_solB[contador][n];
+            }
+          }
+          for (contador=0; contador<AuxP->nmoves-1; contador++){
+            if (contador == 0){
+              printSolutionsB(f, new_solB[contador], AuxP, iniB[contador], fimB[contador], custo, passos);
+              printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+            } else {
+              printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
+            }
+          }
+          fprintf(f,"\n");
+        }
+
+        for (i=0; i<tallocs; i++){
+          free(new_solB[i]);
+        }
+        free(new_solB);
+        free(iniB);
+        free(fimB);
+        break;
+
+      case 'C':
+        AllPoints=NULL;
+        new_solC=NULL;
+
+        if(validateAllPoints(AuxP)==0){
+            printSolutions(f, NULL, AuxP, 0, 0);
+            freePQ(Queue, NewG->G);
+            freelList(new_solC);
+        }else{
+          AllPoints = convertAllPoints(AuxP);
+          searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
+          printSolutionsC(f, new_solC, AuxP);
+
+          freePQ(Queue, NewG->G);
+          freelList(new_solC);
+        }
         break;
       default:
-        NewSol=InicializeSolution(AuxP);
-      }
-    AuxP=AuxP->nPuzzle;
+        printSolutions(f, NULL, AuxP, 0, 0);
+        break;
+    }
 
-    if(AllSol==NULL){
-      AllSol=NewSol;
+    if(Graphs==NULL){
+      Graphs=NewG;
+      AuxG=Graphs;
     } else {
-      AuxSol->nSol=NewSol;
+      AuxG->n=NewG;
     }
-    AuxSol=NewSol;
+    AuxG=NewG;
+    AuxP=AuxP->nPuzzle;
   }
 
-  return AllSol;
+  freeGraph(Graphs);
 }
 
-Sol *operA(Puzzles *Data){
-  int col, line;
-  Sol *Solution = NULL;
+int validateAllPoints(Puzzles *AuxP){
 
-  col=Data->Positions->col;
-  line=Data->Positions->line;
-
-  Solution = InicializeSolution(Data);
-  if( col>=0 && line >= 0 && Data->mode == 'A' && Data->nmoves==1 && col<Data->cols && line < Data->lines){
-    if(Data->board[line][col]!=0){
-      if(ValidateMoveA(line, col, 1, 2, Data)==1){
-        computeSolutionA(line+1, col+2, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, 1, -2, Data)==1){
-        computeSolutionA(line+1, col-2, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, -1, 2, Data)==1){
-        computeSolutionA(line-1, col+2, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, -1, -2, Data)==1){
-        computeSolutionA(line-1, col-2, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, 2, 1, Data)==1){
-        computeSolutionA(line+2, col+1, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, 2, -1, Data)==1){
-        computeSolutionA(line+2, col-1, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, -2, 1, Data)==1){
-        computeSolutionA(line-2, col+1, Data, Solution);
-      }
-      if(ValidateMoveA(line, col, -2, -1, Data)==1){
-        computeSolutionA(line-2, col-1, Data, Solution);
-      }
+    Pos *AuxPos=AuxP->Positions;
+    while(AuxPos!=NULL){
+        if(AuxPos->col>=AuxP->cols||AuxPos->line>=AuxP->lines)
+            return 0;
+        if(AuxP->board[AuxPos->line][AuxPos->col]==0)
+            return 0;
+        AuxPos=AuxPos->nPos;
     }
+    return 1;
+}
+
+lList *convertAllPoints(Puzzles *AuxP){
+
+  Edge *AuxE = NULL;
+  lList *lPoints = NULL;
+  Pos *AuxPos=NULL;
+  AuxPos = AuxP->Positions;
+
+  while (AuxPos!=NULL){
+    AuxE=(Edge *)malloc(sizeof(Edge));
+    AuxE->v=convertV(AuxPos->line, AuxPos->col, AuxP);
+    AuxE->w=AuxP->board[AuxPos->line][AuxPos->col];
+    InsertListNode(&lPoints, AuxE);
+    AuxPos=AuxPos->nPos;
   }
-  return(Solution);
+  return lPoints;
 }
 
-Sol *operB(Puzzles *Data){
-  int col1, col2, line1, line2;
-  Sol *Solution = NULL;
-  Pos *aux = Data->Positions;
+PQueue **iniPQ(Graph *G){
+  PQueue **New = NULL;
+  link *Aux = NULL;
+  int i = 0, j =0;
 
-  Solution = InicializeSolution(Data);
+  New = (PQueue **)malloc(G->V*sizeof(PQueue*));
+  if(New == NULL) exit(0);
 
-  while(aux->nPos!=NULL && Data->mode=='B'){
-    col1=aux->col;
-    col2=aux->nPos->col;
-    line1=aux->line;
-    line2=aux->nPos->line;
-    if(col1<0 || col2<0 || line1<0 || line2<0 || line1>=Data->lines || col1>=Data->cols || line2>=Data->lines||col2>=Data->cols){
-        Solution->valid=-1;
-        Solution->cost=0;
-        break;
-    }
-    if(line1>=Data->lines || col1>=Data->cols || line2>=Data->lines||col2>=Data->cols){
-        Solution->valid=-1;
-        Solution->cost=0;
-        break;
-    }
-    if(ValidateMoveB(line1, col1, line2, col2, Data)==1){
-      computeSolutionB(line2, col2, Data, Solution);
+  for(i=0; i<G->V; i++){
+    New[i]=(PQueue *)malloc(sizeof(PQueue ));
+    if (New[i] == NULL) exit(0);
+  }
+
+  for(i=0; i<G->V; i++){
+    Aux=G->adj[i];
+
+    if(Aux!=NULL){
+      New[j]->v=i;
+      New[j]->adj=Aux;
+      j++;
     }else{
-      Solution->valid=-1;
-      Solution->cost=0;
-      break;
+      New[j]->v=i;
+      New[j]->adj=NULL;
+      j++;
     }
-    aux=aux->nPos;
   }
-  return(Solution);
+
+  return New;
 }
 
-Sol *InicializeSolution(Puzzles *Data){
-  Sol *Solution = NULL;
+int *searchPath(Graph *G, PQueue **Q, int source, int dest){
+  int *price = NULL;
+  int *prev = NULL, *visited = NULL;
+  int i=0, v=0;
+  link *aux =NULL;
 
-  Solution = (Sol *)malloc(sizeof(Sol));
-  if(Solution==NULL)
-    exit(0);
+  if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
-  Solution->nLines = Data->lines;
-  Solution->nCols = Data->cols;
-  Solution->mode = Data->mode;
-  Solution->moves = Data->nmoves;
-  Solution->valid=-1;
-  Solution->cost=0;
-  Solution->nSol = NULL;
+  price=(int *)malloc(G->V*sizeof(int));
+  if(price == NULL) exit(0);
 
-  return Solution;
-}
-
-void computeSolutionA(int x, int y, Puzzles *Data, Sol *Solution){
-  if(Data->board[x][y]<Solution->cost||Solution->cost==0){
-    Solution->cost=Data->board[x][y];
-    Solution->valid = 1;
+  for(i=0; i<G->V; i++){
+    price[i]=INFINITY;
   }
+
+  visited=(int *)malloc(G->V*sizeof(int));
+  if(visited == NULL) exit(0);
+
+  for(i=0; i<G->V; i++){
+    visited[i]=0;
+  }
+
+  prev=(int *)malloc(G->V*sizeof(int));
+  if(prev == NULL) exit(0);
+
+  for(i=0; i<G->V; i++){
+    prev[i]=-1;
+  }
+
+  price[source]=0;
+  v=source;
+
+  if (source==dest){
+    free(visited);
+    free(price);
+    return prev;
+  }
+
+  while (vEmpty(visited, G->V)==0){
+
+    v=searchMin(G->V, visited, price);
+    aux=Q[v]->adj;
+    visited[v]=1;
+
+    while(aux!=NULL){
+
+      if(price[aux->v]>aux->weight+price[v]){
+        price[aux->v]=aux->weight+price[v];
+        prev[aux->v]=v;
+      }
+
+      aux=aux->next;
+    }
+    if(prev[dest]!=-1){
+      free(visited);
+      free(price);
+      return prev;
+    }
+  }
+  free(visited);
+  free(price);
+  return prev;
 }
 
-int ValidateMoveA(int x, int y, int difx, int dify, Puzzles *Data){
-  if(x+difx<0 || y+dify < 0 || x+difx>=Data->lines || y+dify>=Data->cols){
-    return 0;
-  }else if(Data->board[x+difx][y+dify]==0 || Data->board[x][y]==0){
-    return 0;
-  }else{
+void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge *ESource){
+  int *price = NULL;
+  int *prev = NULL, *visited = NULL;
+  int i=0, v=0, prevS=0;
+  link *aux =NULL;
+  lList *Point = *AllPoints;
+  lList *AuxPoints = *AllPoints;
+  lList *FinalPath = *FullPath;
+  Edge *AuxE=NULL;
+
+  if(AllPoints==NULL)
+    return;
+
+  AuxE=Point->data;
+
+
+  if(G->adj[AuxE->v]==NULL) return;
+
+  price=(int *)malloc(G->V*sizeof(int));
+  if(price == NULL) exit(0);
+  for(i=0; i<G->V; i++){
+    price[i]=INFINITY;
+  }
+
+  visited=(int *)malloc(G->V*sizeof(int));
+  if(visited == NULL) exit(0);
+  for(i=0; i<G->V; i++){
+    visited[i]=0;
+  }
+
+  prev=(int *)malloc(G->V*sizeof(int));
+  if(prev == NULL) exit(0);
+  for(i=0; i<G->V; i++){
+    prev[i]=-1;
+  }
+
+  AuxE=ESource;
+  price[AuxE->v]=0;
+  v=AuxE->v;
+  prevS=v;
+  freeNode(AuxE, &Point);
+
+  if(Point==NULL){
+    free(prev);
+    free(visited);
+    free(price);
+    return;
+  }
+
+  while(Point!=NULL||vEmpty(visited, G->V)==0){
+
+    v=searchMin(G->V, visited, price);
+    aux=Q[v]->adj;
+    visited[v]=1;
+
+    while(aux!=NULL){
+
+      if(price[aux->v]>aux->weight+price[v]){
+        price[aux->v]=aux->weight+price[v];
+        prev[aux->v]=v;
+      }
+
+      aux=aux->next;
+    }
+    AuxPoints=Point;
+    while (AuxPoints!=NULL){
+      AuxE=AuxPoints->data;
+      if(prev[AuxE->v]!=-1){
+        addPathSol(prev, FullPath, G, prevS, AuxE->v);
+        prevS=AuxE->v;
+        searchPathC(G, Q, &Point, FullPath, AuxE);
+        free(prev);
+        free(visited);
+        free(price);
+        return;
+      }
+      AuxPoints=AuxPoints->next;
+    }
+  }
+  free(prev);
+  free(visited);
+  free(price);
+  return;
+}
+
+void addPathPoint(lList **Path, Graph *G, int n){
+  Edge *New = NULL;
+  lList *NewList = *Path;
+   New=(Edge *)malloc(sizeof(Edge));
+    New->v=n;
+    New->w=0;
+    InsertListNode(&NewList, New);
+    *Path=NewList;
+}
+
+void addPathSol(int *prev, lList **Path, Graph *G, int source, int n){
+  Edge *New = NULL;
+  lList *NewList = *Path;
+
+  if(n==source)
+    return;
+
+  addPathSol(prev, Path, G, source, prev[n]);
+  addPathPoint(Path, G, n);
+
+  return;
+}
+
+int searchMin(int n, int *visited, int *price){
+    int min=INFINITY, i, v;
+
+    for(i=0; i<n; i++){
+        if(price[i]<min&&visited[i]==0){
+            min=price[i];
+            v=i;
+        }
+    }
+
+    return v;
+}
+
+int vEmpty(int *Data, int n){
+    int i=0;
+    for(i=0; i<n; i++){
+        if(Data[i]!=1)
+            return 0;
+    }
     return 1;
-  }
 }
 
-void computeSolutionB(int x, int y, Puzzles *Data, Sol *Solution){
-  Solution->cost+=Data->board[x][y];
-  Solution->valid = 1;
-}
+void freePQ(PQueue **Data, Graph *G){
+  int i;
 
-int ValidateMoveB(int x, int y, int x2, int y2, Puzzles *Data){
-  if(Data->board[x][y]==0 || Data->board[x2][y2]==0 ){
-    return 0;
-  }else if (x>=Data->lines || x2>=Data->lines || y>=Data->cols || y2>=Data->cols){
-    return 0;
-  } else if(((x-x2) == 1 || (x-x2)== -1)&& ((y-y2)==2 || (y-y2)==-2)){
-    return 1;
-  }else if(((x-x2) == 2 || (x-x2)== -2)&& ((y-y2)==1 || (y-y2)==-1)){
-    return 1;
-  } else{
-    return 0;
+  for(i=0; i<G->V; i++){
+    free(Data[i]);
   }
+  free(Data);
 }

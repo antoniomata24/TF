@@ -7,10 +7,6 @@ Programado por: António da Mata nº90022
 *******************************************************************/
 
 #include "define.h"
-#include "list.h"
-#include "file.h"
-#include "grafs.h"
-#include "pqueue.h"
 
 int main(int argc, char *argv[]){
 
@@ -25,7 +21,7 @@ int main(int argc, char *argv[]){
 
   fOut = createFileSol(argv[1]);
 
-  mainPQ(Puzzle, fOut);
+  mainOper(Puzzle, fOut);
 
   freeAllPuzzle(Puzzle);
   fclose(fOut);

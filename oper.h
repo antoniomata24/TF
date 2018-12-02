@@ -3,12 +3,17 @@
 
 #include "define.h"
 
-Sol *mainOper(Puzzles *Data);
-Sol *operA(Puzzles *Data);
-Sol *operB(Puzzles *);
-int ValidateMoveA(int , int, int , int, Puzzles *);
-Sol *InicializeSolution(Puzzles *);
-void computeSolutionA(int , int , Puzzles *, Sol *);
-int ValidateMoveB(int , int , int , int , Puzzles *);
-void computeSolutionB(int , int , Puzzles *, Sol *);
+void searchPathC(Graph *, PQueue **, lList **, lList **, Edge *);
+void addPathSol(int *, lList **, Graph *, int , int );
+void addPathPoint(lList **, Graph *, int );
+lList seachNode(Item, lList *);
+lList *convertAllPoints(Puzzles *);
+void mainOper(Puzzles *, FILE *);
+PQueue **iniPQ(Graph *);
+int *searchPath(Graph *, PQueue **, int , int );
+int searchMin(int , int *, int *);
+int vEmpty(int *, int );
+void freePQ(PQueue **, Graph *);
+int validateAllPoints(Puzzles *);
+
 #endif

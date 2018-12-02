@@ -88,6 +88,7 @@ void invertConvertV(int n, Puzzles *Data, int *x, int *y){
   (*x)=n/Data->cols;
   (*y)=n-(*x)*Data->cols;
 }
+
 void freeGraph(LGraph *Data){
 
   int i=0;
@@ -96,6 +97,7 @@ void freeGraph(LGraph *Data){
     return;
 
   freeGraph(Data->n);
+  
   for(i=0;i<Data->G->V;i++){
     freeLink(Data->G->adj[i]);
   }
@@ -113,8 +115,7 @@ void freeLink(link *Data){
 
 }
 
-link *NEW(int v, link *next, int weight)
-{
+link *NEW(int v, link *next, int weight){
   link *aux = next;
   link *first = next;
   link *x = (link *) malloc(sizeof(struct node));
@@ -132,8 +133,7 @@ link *NEW(int v, link *next, int weight)
   }
 }
 
-Graph *GRAPHinit(int V)
-{
+Graph *GRAPHinit(int V){
   int v;
   Graph *G = (Graph*) malloc(sizeof(Graph));
 
@@ -146,8 +146,7 @@ Graph *GRAPHinit(int V)
   return G;
 }
 
-void GRAPHinsertE(Graph *G, int v, int w, int weight)
-{
+void GRAPHinsertE(Graph *G, int v, int w, int weight){
   G->adj[v] = NEW(w, G->adj[v], weight);
   G->E++;
 }

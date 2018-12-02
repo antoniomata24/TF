@@ -91,7 +91,6 @@ Puzzles *readFile(char *nomef){
   return AllPuzzle;
 }
 
-
 FILE *createFileSol(char *nomef){
   FILE *f1 = NULL;
   char *string = NULL;
@@ -114,8 +113,7 @@ FILE *createFileSol(char *nomef){
   return f1;
 }
 
-void printSolutions(FILE *f, int *sol, Puzzles *Puzzle,
-                    int ini, int fim){
+void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
   int custo=0, passos=0, x=0, y=0, n;
 
   n=fim;
@@ -155,7 +153,7 @@ void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
                                       Puzzle->nmoves , custo, passos);
     return;
   }
-  
+
   while(AuxL!=NULL){
     AuxE=AuxL->data;
     invertConvertV(AuxE->v, Puzzle, &x, &y);

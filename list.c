@@ -1,5 +1,4 @@
 #include "list.h"
-#include "define.h"
 
 void freelList(lList *DataOut){
 
