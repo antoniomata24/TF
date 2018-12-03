@@ -1,15 +1,5 @@
 #include "list.h"
 
-void freelList(lList *DataOut){
-
-  if(DataOut==NULL)
-    return;
-
-  freelList(DataOut->next);
-  free(DataOut->data);
-  free(DataOut);
-}
-
 void InsertListNode(lList **ListIn ,Item DataIn){
   lList *New=NULL;
   lList *Aux=*ListIn;
@@ -51,6 +41,16 @@ void freeNode(Item DataOut, lList **First){
   }
 }
 
+void freelList(lList *DataOut){
+
+  if(DataOut==NULL)
+    return;
+
+  freelList(DataOut->next);
+  free(DataOut->data);
+  free(DataOut);
+}
+
 void freeAllPuzzle(Puzzles *Data){
   if(Data == NULL)
     return;
@@ -76,5 +76,37 @@ void freePosition(Pos *Data){
 
   freePosition(Data->nPos);
 
+  free(Data);
+}
+
+void freeGraph(Graph *Data){
+
+  int i=0;
+
+  if(Data==NULL)
+    return;
+
+  for(i=0;i<Data->V;i++){
+    freeLink(Data->adj[i]);
+  }
+  free(Data->adj);
+  free(Data);
+}
+
+void freeLink(link *Data){
+  if(Data==NULL)
+    return;
+
+  freeLink(Data->next);
+  free(Data);
+
+}
+
+void freePQ(PQueue **Data, Graph *G){
+  int i;
+
+  for(i=0; i<G->V; i++){
+    free(Data[i]);
+  }
   free(Data);
 }

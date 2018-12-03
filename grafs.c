@@ -73,29 +73,6 @@ void invertConvertV(int n, Puzzles *Data, int *x, int *y){
   (*y)=n-(*x)*Data->cols;
 }
 
-void freeGraph(Graph *Data){
-
-  int i=0;
-
-  if(Data==NULL)
-    return;
-
-  for(i=0;i<Data->V;i++){
-    freeLink(Data->adj[i]);
-  }
-  free(Data->adj);
-  free(Data);
-}
-
-void freeLink(link *Data){
-  if(Data==NULL)
-    return;
-
-  freeLink(Data->next);
-  free(Data);
-
-}
-
 link *NEW(int v, link *next, int weight){
   link *aux = next;
   link *first = next;

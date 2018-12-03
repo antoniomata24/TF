@@ -5,8 +5,6 @@
 
 Graph *createGraph (Puzzles *);
 Graph *GRAPHinit(int );
-void freeGraph(Graph *);
-void freeLink(link *);
 void invertConvertV(int , Puzzles *, int *, int *);
 int convertV(int , int ,Puzzles *);
 void GRAPHinsertE(Graph *, int, int, int);

@@ -16,7 +16,6 @@ int main(int argc, char *argv[]){
   if (argc != 2) {
     exit(0);
   }
-
   Puzzle = readFile(argv[1]);
 
   fOut = createFileSol(argv[1]);

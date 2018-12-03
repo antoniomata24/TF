@@ -17,6 +17,7 @@ void mainOper(Puzzles *Data, FILE *f){
   lList *AllPoints = NULL, *new_solC=NULL;
   Graph *NewG = NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
+  int tallocs=0;
 
   AuxP = Data;
   if (AuxP == NULL) exit(0);
@@ -38,9 +39,9 @@ void mainOper(Puzzles *Data, FILE *f){
         /*prints the solution in the exit file*/
         printSolutions(f, new_sol, AuxP, ini, fim);
 
+        freePQ(Queue, NewG);
         freeGraph(NewG);
         NewG=NULL;
-        freePQ(Queue, NewG);
         free(new_sol);
 
         break;
@@ -58,7 +59,7 @@ void mainOper(Puzzles *Data, FILE *f){
         custo=0;
         passos=0;
         inv=0;
-        int tallocs=0;
+        tallocs=0;
 
         while (AuxPos->nPos!=NULL){
           new_solB[contador]=NULL;
@@ -439,13 +440,4 @@ int vEmpty(int *Data, int n){
             return 0;
     }
     return 1;
-}
-
-void freePQ(PQueue **Data, Graph *G){
-  int i;
-
-  for(i=0; i<G->V; i++){
-    free(Data[i]);
-  }
-  free(Data);
 }
