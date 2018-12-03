@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INFINITY 99999
+#define INFINITY 999999
 
 typedef struct node link;
 typedef struct _graph Graph;

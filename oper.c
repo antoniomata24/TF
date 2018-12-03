@@ -1,5 +1,13 @@
 #include "oper.h"
 
+/* mainOper - computes and prints in exit file the solutions to the multiple
+              Puzzles in the entry file
+
+  \param Data - Pointer to the list of structs (Puzzles) wich contain the
+                multiple Puzzles and all their info
+  \param f - Pointer to the out file, wich will contains the solutions
+
+*/
 void mainOper(Puzzles *Data, FILE *f){
   int * new_sol = NULL, *iniB =NULL, *fimB = NULL;
   int **new_solB = NULL;
@@ -7,7 +15,7 @@ void mainOper(Puzzles *Data, FILE *f){
   Puzzles *AuxP = NULL;
   Pos *AuxPos = NULL;
   lList *AllPoints = NULL, *new_solC=NULL;
-  LGraph *Graphs = NULL, *AuxG = NULL, *NewG = NULL;
+  LGraph *NewG = NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
 
   AuxP = Data;
@@ -15,17 +23,23 @@ void mainOper(Puzzles *Data, FILE *f){
 
   while (AuxP!=NULL){
     AuxPos = AuxP->Positions;
+    /*Creates Graph to all the eligible points in the puzzle and their possible
+    moves*/
     NewG = createGraph(AuxP);
     contador = 0;
 
     switch (AuxP->mode) {
       case 'A':
-
+        /*converts initial and final points of the intended path*/
         ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
         fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
+        /*runs Dijkstra algorithm to search minimum cost path*/
         new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
+        /*prints the solution in the exit file*/
         printSolutions(f, new_sol, AuxP, ini, fim);
 
+        freeGraph(NewG);
+        NewG=NULL;
         freePQ(Queue, NewG->G);
         free(new_sol);
 
@@ -90,6 +104,8 @@ void mainOper(Puzzles *Data, FILE *f){
         for (i=0; i<tallocs; i++){
           free(new_solB[i]);
         }
+        freeGraph(NewG);
+        NewG=NULL;
         free(new_solB);
         free(iniB);
         free(fimB);
@@ -101,6 +117,8 @@ void mainOper(Puzzles *Data, FILE *f){
 
         if(validateAllPoints(AuxP)==0){
             printSolutions(f, NULL, AuxP, 0, 0);
+            freeGraph(NewG);
+            NewG=NULL;
         }else{
           AllPoints = convertAllPoints(AuxP);
           searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
@@ -108,6 +126,8 @@ void mainOper(Puzzles *Data, FILE *f){
 
           freePQ(Queue, NewG->G);
           freelList(new_solC);
+          freeGraph(NewG);
+          NewG=NULL;
         }
         break;
       default:
@@ -115,17 +135,9 @@ void mainOper(Puzzles *Data, FILE *f){
         break;
     }
 
-    if(Graphs==NULL){
-      Graphs=NewG;
-      AuxG=Graphs;
-    } else {
-      AuxG->n=NewG;
-    }
-    AuxG=NewG;
     AuxP=AuxP->nPuzzle;
   }
 
-  freeGraph(Graphs);
 }
 
 int validateAllPoints(Puzzles *AuxP){
