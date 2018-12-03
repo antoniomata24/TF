@@ -9,10 +9,8 @@
 
 typedef struct node link;
 typedef struct _graph Graph;
-typedef struct _ListG LGraph;
 typedef struct _Puzzles Puzzles;
 typedef struct _Pos Pos;
-typedef struct _Sol Sol;
 typedef void * Item;
 typedef struct _lList lList;
 typedef struct _PQueue PQueue;
@@ -39,11 +37,6 @@ typedef struct _edge{
   int w;
 }Edge;
 
-struct _ListG{
-  Graph *G;
-  LGraph *n;
-};
-
 struct _lList{
   Item data;
   lList *next;
@@ -63,16 +56,6 @@ struct _Pos{
   int line;
   int col;
   Pos *nPos;
-};
-
-struct _Sol{
-  int nLines;
-  int nCols;
-  int mode;
-  int moves;
-  int valid;
-  int cost;
-  Sol *nSol;
 };
 
 #include "oper.h"

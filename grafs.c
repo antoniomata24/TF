@@ -1,77 +1,61 @@
 #include "grafs.h"
 
-LGraph *createGraph (Puzzles *Data){
+Graph *createGraph (Puzzles *Data){
 
   Puzzles *AuxPuzzle = NULL;
-  Graph *AuxG=NULL;
-  LGraph *First = NULL, *NewLG = NULL, *AuxList=NULL;
+  Graph *NewG=NULL;
   int i, j, vi, vf;
   AuxPuzzle=Data;
 
   if (AuxPuzzle == NULL)
       exit(0);
 
-  while(AuxPuzzle!=NULL){
-    NewLG=(LGraph *)malloc(sizeof(LGraph));
+  NewG=GRAPHinit((AuxPuzzle->cols)*(AuxPuzzle->lines));
+  if(NewG==NULL)
+    exit(0);
 
-    AuxG=GRAPHinit((AuxPuzzle->cols)*(AuxPuzzle->lines));
-    if(AuxG==NULL)
-      exit(0);
+  if(Data->mode=='A' || Data->mode=='B' || Data->mode=='C'){
 
-    if(Data->mode=='A' || Data->mode=='B' || Data->mode=='C'){
-
-      for(i=0; i<Data->lines; i++){
-        for(j=0; j<Data->cols; j++){
-          vi=convertV(i, j, Data);
-          if(ValidateMoveA(i, j, 1, 2, Data)==1){
-            vf=convertV(i+1, j+2, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j+2]);
-          }
-          if(ValidateMoveA(i, j, 1, -2, Data)==1){
-            vf=convertV(i+1, j-2, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i+1][j-2]);
-          }
-          if(ValidateMoveA(i, j, -1, 2, Data)==1){
-            vf=convertV(i-1, j+2, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j+2]);
-          }
-          if(ValidateMoveA(i, j, -1, -2, Data)==1){
-            vf=convertV(i-1, j-2, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i-1][j-2]);
-          }
-          if(ValidateMoveA(i, j, 2, 1, Data)==1){
-            vf=convertV(i+2, j+1, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j+1]);
-          }
-          if(ValidateMoveA(i, j, 2, -1, Data)==1){
-            vf=convertV(i+2, j-1, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i+2][j-1]);
-          }
-          if(ValidateMoveA(i, j, -2, 1, Data)==1){
-            vf=convertV(i-2, j+1, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j+1]);
-          }
-          if(ValidateMoveA(i, j, -2, -1, Data)==1){
-            vf=convertV(i-2, j-1, Data);
-            GRAPHinsertE(AuxG, vi, vf, Data->board[i-2][j-1]);
-          }
+    for(i=0; i<Data->lines; i++){
+      for(j=0; j<Data->cols; j++){
+        vi=convertV(i, j, Data);
+        if(ValidateMoveA(i, j, 1, 2, Data)==1){
+          vf=convertV(i+1, j+2, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i+1][j+2]);
+        }
+        if(ValidateMoveA(i, j, 1, -2, Data)==1){
+          vf=convertV(i+1, j-2, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i+1][j-2]);
+        }
+        if(ValidateMoveA(i, j, -1, 2, Data)==1){
+          vf=convertV(i-1, j+2, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i-1][j+2]);
+        }
+        if(ValidateMoveA(i, j, -1, -2, Data)==1){
+          vf=convertV(i-1, j-2, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i-1][j-2]);
+        }
+        if(ValidateMoveA(i, j, 2, 1, Data)==1){
+          vf=convertV(i+2, j+1, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i+2][j+1]);
+        }
+        if(ValidateMoveA(i, j, 2, -1, Data)==1){
+          vf=convertV(i+2, j-1, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i+2][j-1]);
+        }
+        if(ValidateMoveA(i, j, -2, 1, Data)==1){
+          vf=convertV(i-2, j+1, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i-2][j+1]);
+        }
+        if(ValidateMoveA(i, j, -2, -1, Data)==1){
+          vf=convertV(i-2, j-1, Data);
+          GRAPHinsertE(NewG, vi, vf, Data->board[i-2][j-1]);
         }
       }
     }
-
-    NewLG->G=AuxG;
-    NewLG->n=NULL;
-    if(First == NULL){
-      First = NewLG;
-      AuxList=NewLG;
-    } else {
-      AuxList->n = NewLG;
-      AuxList=NewLG;
-    }
-    AuxPuzzle=AuxPuzzle->nPuzzle;
   }
 
-  return First;
+  return NewG;
 }
 
 int convertV(int x, int y,Puzzles *Data){
@@ -89,20 +73,17 @@ void invertConvertV(int n, Puzzles *Data, int *x, int *y){
   (*y)=n-(*x)*Data->cols;
 }
 
-void freeGraph(LGraph *Data){
+void freeGraph(Graph *Data){
 
   int i=0;
 
   if(Data==NULL)
     return;
 
-  freeGraph(Data->n);
-  
-  for(i=0;i<Data->G->V;i++){
-    freeLink(Data->G->adj[i]);
+  for(i=0;i<Data->V;i++){
+    freeLink(Data->adj[i]);
   }
-  free(Data->G->adj);
-  free(Data->G);
+  free(Data->adj);
   free(Data);
 }
 

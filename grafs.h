@@ -3,9 +3,9 @@
 
 #include "define.h"
 
-LGraph *createGraph (Puzzles *);
+Graph *createGraph (Puzzles *);
 Graph *GRAPHinit(int );
-void freeGraph(LGraph *);
+void freeGraph(Graph *);
 void freeLink(link *);
 void invertConvertV(int , Puzzles *, int *, int *);
 int convertV(int , int ,Puzzles *);

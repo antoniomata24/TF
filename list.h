@@ -7,6 +7,5 @@ void freeNode(Item , lList **);
 void freelList(lList *);
 void freeAllPuzzle(Puzzles *);
 void freePosition(Pos *);
-void freeSolution(Sol *);
 
 #endif

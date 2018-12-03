@@ -78,11 +78,3 @@ void freePosition(Pos *Data){
 
   free(Data);
 }
-
-void freeSolution(Sol *Data){
-  if(Data==NULL)
-    return;
-
-  freeSolution(Data->nSol);
-  free(Data);
-}

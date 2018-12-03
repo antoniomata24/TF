@@ -1,6 +1,6 @@
 #include "oper.h"
 
-/* mainOper - computes and prints in exit file the solutions to the multiple
+/** mainOper - computes and prints in exit file the solutions to the multiple
               Puzzles in the entry file
 
   \param Data - Pointer to the list of structs (Puzzles) wich contain the
@@ -15,7 +15,7 @@ void mainOper(Puzzles *Data, FILE *f){
   Puzzles *AuxP = NULL;
   Pos *AuxPos = NULL;
   lList *AllPoints = NULL, *new_solC=NULL;
-  LGraph *NewG = NULL;
+  Graph *NewG = NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
 
   AuxP = Data;
@@ -34,13 +34,13 @@ void mainOper(Puzzles *Data, FILE *f){
         ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
         fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
         /*runs Dijkstra algorithm to search minimum cost path*/
-        new_sol=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), ini, fim);
+        new_sol=searchPath(NewG, (Queue = iniPQ(NewG)), ini, fim);
         /*prints the solution in the exit file*/
         printSolutions(f, new_sol, AuxP, ini, fim);
 
         freeGraph(NewG);
         NewG=NULL;
-        freePQ(Queue, NewG->G);
+        freePQ(Queue, NewG);
         free(new_sol);
 
         break;
@@ -64,8 +64,8 @@ void mainOper(Puzzles *Data, FILE *f){
           new_solB[contador]=NULL;
           iniB[contador]=convertV(AuxPos->line, AuxPos->col, AuxP);
           fimB[contador]=convertV(AuxPos->nPos->line, AuxPos->nPos->col, AuxP);
-          new_solB[contador]=searchPath(NewG->G, (Queue = iniPQ(NewG->G)), iniB[contador], fimB[contador]);
-          freePQ(Queue, NewG->G);
+          new_solB[contador]=searchPath(NewG, (Queue = iniPQ(NewG)), iniB[contador], fimB[contador]);
+          freePQ(Queue, NewG);
           if(new_solB[contador]==NULL) break;
           AuxPos = AuxPos->nPos;
           contador++;
@@ -121,10 +121,10 @@ void mainOper(Puzzles *Data, FILE *f){
             NewG=NULL;
         }else{
           AllPoints = convertAllPoints(AuxP);
-          searchPathC(NewG->G, (Queue = iniPQ(NewG->G)), &AllPoints, &new_solC, AllPoints->data);
+          searchPathC(NewG, (Queue = iniPQ(NewG)), &AllPoints, &new_solC, AllPoints->data);
           printSolutionsC(f, new_solC, AuxP);
 
-          freePQ(Queue, NewG->G);
+          freePQ(Queue, NewG);
           freelList(new_solC);
           freeGraph(NewG);
           NewG=NULL;
@@ -139,7 +139,15 @@ void mainOper(Puzzles *Data, FILE *f){
   }
 
 }
+/** validateAllPoints - checks if all path points inserted in the entry file are
+                        valid (within board margin and contains a value diferent
+                        than 0)
 
+    \param AuxP - Puzzle struct wich contains board values and path points
+
+    returns 1 if all points are valid
+    returns 0 if a invalid point is detected
+*/
 int validateAllPoints(Puzzles *AuxP){
 
     Pos *AuxPos=AuxP->Positions;
@@ -153,6 +161,12 @@ int validateAllPoints(Puzzles *AuxP){
     return 1;
 }
 
+/* convertAllPoints - converts path points in the entry file from coordinates to
+                      absolute value (horizontal order)
+  \param AuxP - Puzzle struct wich contains board values and path points
+
+  returns a linked list with Edge strutcs with all the path points to be analysed
+*/
 lList *convertAllPoints(Puzzles *AuxP){
 
   Edge *AuxE = NULL;
@@ -200,6 +214,19 @@ PQueue **iniPQ(Graph *G){
   return New;
 }
 
+/** searchPath - runs Dijkstra algorithm to find the lowest cost path between 2
+                points
+
+    \param G - Graph wich contain all points and their adjacent points
+    \param Q - vertex wich contains in each position a single point and its
+               adjacent points
+    \param source - absolute value of the ortigin of the intended Path
+    \param dest - absolute value of the destination of the intended path
+
+    return a vertex of int wich contains the previous path position of each
+          point (if a point doesn't has a previous path points that point vertex
+          position will contain -1)
+*/
 int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   int *price = NULL;
   int *prev = NULL, *visited = NULL;
@@ -209,22 +236,21 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
   price=(int *)malloc(G->V*sizeof(int));
-  if(price == NULL) exit(0);
-
+  if(price == NULL)
+    exit(0);
   for(i=0; i<G->V; i++){
     price[i]=INFINITY;
   }
 
   visited=(int *)malloc(G->V*sizeof(int));
-  if(visited == NULL) exit(0);
-
+  if(visited == NULL)
+    exit(0);
   for(i=0; i<G->V; i++){
     visited[i]=0;
   }
-
   prev=(int *)malloc(G->V*sizeof(int));
-  if(prev == NULL) exit(0);
-
+  if(prev == NULL)
+    exit(0);
   for(i=0; i<G->V; i++){
     prev[i]=-1;
   }
@@ -264,6 +290,19 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   return prev;
 }
 
+/** searchPathC - runs Dijkstra algorithm to find lowest cost path to caint
+                  multiple points specified in the entry file
+
+    \param G - Graph wich contain all points and their adjacent points
+    \param Q - vertex wich contains in each position a single point and its
+               adjacent points
+    \param AllPoints - linked list of Edge structs wich contains all points the
+                      path must have
+    \param FullPath - linked list of Edge structs wich will contain the lowest
+                      cost path
+    \param ESource - Edge struct that contains the source point, in absolute
+                    value, of the intended path
+*/
 void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge *ESource){
   int *price = NULL;
   int *prev = NULL, *visited = NULL;
@@ -332,7 +371,7 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
     while (AuxPoints!=NULL){
       AuxE=AuxPoints->data;
       if(prev[AuxE->v]!=-1){
-        addPathSol(prev, FullPath, G, prevS, AuxE->v);
+        addPathSol(prev, FullPath, prevS, AuxE->v);
         prevS=AuxE->v;
         searchPathC(G, Q, &Point, FullPath, AuxE);
         free(prev);
@@ -349,7 +388,14 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
   return;
 }
 
-void addPathPoint(lList **Path, Graph *G, int n){
+/* addPathPoint - add a single point to the Path list computed by the "searchPathC"
+                fuction
+
+  \param Path - linked list with Edge structs that contain all path points where
+                a single path point will be inserted (at the end of the list)
+  \param n - absolute value of the path point to be inserted in the path list
+*/
+void addPathPoint(lList **Path, int n){
   Edge *New = NULL;
   lList *NewList = *Path;
    New=(Edge *)malloc(sizeof(Edge));
@@ -359,15 +405,16 @@ void addPathPoint(lList **Path, Graph *G, int n){
     *Path=NewList;
 }
 
-void addPathSol(int *prev, lList **Path, Graph *G, int source, int n){
+
+void addPathSol(int *prev, lList **Path, int source, int n){
   Edge *New = NULL;
   lList *NewList = *Path;
 
   if(n==source)
     return;
 
-  addPathSol(prev, Path, G, source, prev[n]);
-  addPathPoint(Path, G, n);
+  addPathSol(prev, Path, source, prev[n]);
+  addPathPoint(Path, n);
 
   return;
 }

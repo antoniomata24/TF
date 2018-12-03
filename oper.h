@@ -4,8 +4,8 @@
 #include "define.h"
 
 void searchPathC(Graph *, PQueue **, lList **, lList **, Edge *);
-void addPathSol(int *, lList **, Graph *, int , int );
-void addPathPoint(lList **, Graph *, int );
+void addPathSol(int *, lList **,int , int );
+void addPathPoint(lList **, int );
 lList seachNode(Item, lList *);
 lList *convertAllPoints(Puzzles *);
 void mainOper(Puzzles *, FILE *);
