@@ -17,19 +17,18 @@ typedef struct _PQueue PQueue;
 
 struct _PQueue{
   int v;
-  link *adj;
+  lList *adj;
 };
 
 struct node {
   int v;
   int weight;
-  link *next;
 };
 
 struct _graph{
   int V;
   int E;
-  link **adj;
+  lList **adj;
 };
 
 typedef struct _edge{
@@ -47,7 +46,7 @@ struct _Puzzles{
   int nmoves;
   int lines;
   int cols;
-  Pos *Positions;
+  lList *Positions;
   int **board;
   Puzzles *nPuzzle;
 };
@@ -55,7 +54,6 @@ struct _Puzzles{
 struct _Pos{
   int line;
   int col;
-  Pos *nPos;
 };
 
 #include "oper.h"

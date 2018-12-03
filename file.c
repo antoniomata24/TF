@@ -32,6 +32,7 @@ Puzzles *readFile(char *nomef){
     NewPuzzle->Positions = NULL;
 
     for(i=0; i<moves; i++){
+        NewPos=NULL;
         NewPos=(Pos *)malloc(sizeof(Pos));
         if(NewPos == NULL){
           exit(0);
@@ -40,13 +41,7 @@ Puzzles *readFile(char *nomef){
         p = fscanf(fi, "%d %d", &NewPos->line, &NewPos->col);
         if(p!=2)
           exit(0);
-        NewPos->nPos = NULL;
-      if(NewPuzzle->Positions==NULL){
-        NewPuzzle->Positions = NewPos;
-      }else{
-        AuxPos->nPos = NewPos;
-      }
-        AuxPos = NewPos;
+        InsertListNode(&NewPuzzle->Positions, NewPos);
     }
 
     if(mode=='A'||mode=='B'||mode=='C'){

@@ -73,22 +73,11 @@ void invertConvertV(int n, Puzzles *Data, int *x, int *y){
   (*y)=n-(*x)*Data->cols;
 }
 
-link *NEW(int v, link *next, int weight){
-  link *aux = next;
-  link *first = next;
+void NEW(int v, lList **next, int weight){
   link *x = (link *) malloc(sizeof(struct node));
   x->weight=weight;
   x->v = v;
-  if(next==NULL){
-    x ->next = next;
-    return x;
-  }else{
-    while(aux->next!=NULL)
-      aux=aux->next;
-    aux->next=x;
-    x->next=NULL;
-    return first;
-  }
+  InsertListNode(next, x);
 }
 
 Graph *GRAPHinit(int V){
@@ -97,7 +86,7 @@ Graph *GRAPHinit(int V){
 
   G->V = V;
   G->E = 0;
-  G->adj = (link **) malloc(V * sizeof(link*));
+  G->adj = (lList **) malloc(V * sizeof(lList*));
 
   for (v = 0; v < V; v++)
     G->adj[v] = NULL;
@@ -105,7 +94,7 @@ Graph *GRAPHinit(int V){
 }
 
 void GRAPHinsertE(Graph *G, int v, int w, int weight){
-  G->adj[v] = NEW(w, G->adj[v], weight);
+  NEW(w, &G->adj[v], weight);
   G->E++;
 }
 

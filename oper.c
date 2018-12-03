@@ -13,8 +13,8 @@ void mainOper(Puzzles *Data, FILE *f){
   int **new_solB = NULL;
   PQueue **Queue = NULL;
   Puzzles *AuxP = NULL;
-  Pos *AuxPos = NULL;
-  lList *AllPoints = NULL, *new_solC=NULL;
+  lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL;
+  Pos *SinglePos=NULL;
   Graph *NewG = NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
   int tallocs=0;
@@ -32,8 +32,10 @@ void mainOper(Puzzles *Data, FILE *f){
     switch (AuxP->mode) {
       case 'A':
         /*converts initial and final points of the intended path*/
-        ini=convertV(AuxP->Positions->line, AuxP->Positions->col, AuxP);
-        fim=convertV(AuxP->Positions->nPos->line, AuxP->Positions->nPos->col, AuxP);
+        SinglePos=AuxPos->data;
+        ini=convertV(SinglePos->line, SinglePos->col, AuxP);
+        SinglePos=AuxPos->next->data;
+        fim=convertV(SinglePos->line, SinglePos->col, AuxP);
         /*runs Dijkstra algorithm to search minimum cost path*/
         new_sol=searchPath(NewG, (Queue = iniPQ(NewG)), ini, fim);
         /*prints the solution in the exit file*/
@@ -61,14 +63,16 @@ void mainOper(Puzzles *Data, FILE *f){
         inv=0;
         tallocs=0;
 
-        while (AuxPos->nPos!=NULL){
+        while (AuxPos->next!=NULL){
           new_solB[contador]=NULL;
-          iniB[contador]=convertV(AuxPos->line, AuxPos->col, AuxP);
-          fimB[contador]=convertV(AuxPos->nPos->line, AuxPos->nPos->col, AuxP);
+          SinglePos=AuxPos->data;
+          iniB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
+          SinglePos=AuxPos->next->data;
+          fimB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
           new_solB[contador]=searchPath(NewG, (Queue = iniPQ(NewG)), iniB[contador], fimB[contador]);
           freePQ(Queue, NewG);
           if(new_solB[contador]==NULL) break;
-          AuxPos = AuxPos->nPos;
+          AuxPos = AuxPos->next;
           contador++;
           tallocs++;
         }
@@ -151,13 +155,15 @@ void mainOper(Puzzles *Data, FILE *f){
 */
 int validateAllPoints(Puzzles *AuxP){
 
-    Pos *AuxPos=AuxP->Positions;
-    while(AuxPos!=NULL){
+    lList *PosList=AuxP->Positions;
+    Pos *AuxPos=NULL;;
+    while(PosList!=NULL){
+        AuxPos=PosList->data;
         if(AuxPos->col>=AuxP->cols||AuxPos->line>=AuxP->lines||AuxPos->line<0||AuxPos->col<0)
             return 0;
         if(AuxP->board[AuxPos->line][AuxPos->col]==0)
             return 0;
-        AuxPos=AuxPos->nPos;
+        PosList=PosList->next;
     }
     return 1;
 }
@@ -171,23 +177,24 @@ int validateAllPoints(Puzzles *AuxP){
 lList *convertAllPoints(Puzzles *AuxP){
 
   Edge *AuxE = NULL;
-  lList *lPoints = NULL;
+  lList *lPoints= NULL, *PosList = NULL;
   Pos *AuxPos=NULL;
-  AuxPos = AuxP->Positions;
 
-  while (AuxPos!=NULL){
+  PosList=AuxP->Positions;
+  while (PosList!=NULL){
     AuxE=(Edge *)malloc(sizeof(Edge));
+    AuxPos=PosList->data;
     AuxE->v=convertV(AuxPos->line, AuxPos->col, AuxP);
     AuxE->w=AuxP->board[AuxPos->line][AuxPos->col];
     InsertListNode(&lPoints, AuxE);
-    AuxPos=AuxPos->nPos;
+    PosList=PosList->next;
   }
   return lPoints;
 }
 
 PQueue **iniPQ(Graph *G){
   PQueue **New = NULL;
-  link *Aux = NULL;
+  lList *Aux = NULL;
   int i = 0, j =0;
 
   New = (PQueue **)malloc(G->V*sizeof(PQueue*));
@@ -233,6 +240,7 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   int *prev = NULL, *visited = NULL;
   int i=0, v=0;
   link *aux =NULL;
+  lList *laux=NULL;
 
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
@@ -268,17 +276,18 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
   while (vEmpty(visited, G->V)==0){
 
     v=searchMin(G->V, visited, price);
-    aux=Q[v]->adj;
+    laux=Q[v]->adj;
+    aux=laux->data;
     visited[v]=1;
 
-    while(aux!=NULL){
-
+    while(laux!=NULL){
+      aux=laux->data;
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
         prev[aux->v]=v;
       }
 
-      aux=aux->next;
+      laux=laux->next;
     }
     if(prev[dest]!=-1){
       free(visited);
@@ -309,6 +318,7 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
   int *prev = NULL, *visited = NULL;
   int i=0, v=0, prevS=0;
   link *aux =NULL;
+  lList *laux =NULL;
   lList *Point = *AllPoints;
   lList *AuxPoints = *AllPoints;
   lList *FinalPath = *FullPath;
@@ -356,17 +366,18 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
   while(Point!=NULL||vEmpty(visited, G->V)==0){
 
     v=searchMin(G->V, visited, price);
-    aux=Q[v]->adj;
+    laux=Q[v]->adj;
+    aux=laux->data;
     visited[v]=1;
 
-    while(aux!=NULL){
-
+    while(laux!=NULL){
+      aux=laux->data;
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
         prev[aux->v]=v;
       }
 
-      aux=aux->next;
+      laux=laux->next;
     }
     AuxPoints=Point;
     while (AuxPoints!=NULL){
