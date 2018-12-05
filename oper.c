@@ -35,6 +35,14 @@ void mainOper(Puzzles *Data, FILE *f){
         ini=convertV(SinglePos->line, SinglePos->col, AuxP);
         SinglePos=AuxPos->next->data;
         fim=convertV(SinglePos->line, SinglePos->col, AuxP);
+        if(ini==fim){
+          new_sol=(int *)malloc(sizeof(int));
+          new_sol[0]=0;
+          printSolutions(f, new_sol, AuxP, 0, 0);
+          free(new_sol);
+          freeGraph(NewG);
+          break;
+        }
         /*runs Dijkstra algorithm to search minimum cost path*/
         new_sol=searchPath(NewG, ini, fim);
         /*prints the solution in the exit file*/
@@ -377,8 +385,9 @@ void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
 
   AuxE=Point->data;
 
-
-  if(G->adj[AuxE->v]==NULL) return;
+  if(G->adj[AuxE->v]==NULL){
+    return;
+  }
 
   price=(int *)malloc(G->V*sizeof(int));
   if(price == NULL) exit(0);
@@ -397,7 +406,7 @@ void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
   AuxE=ESource;
   price[AuxE->v]=0;
   v=AuxE->v;
-    for(i=0; i<G->V; i++){
+  for(i=0; i<G->V; i++){
     Hinsert(heap, hsize, &nfree, i, price);
   }
 
@@ -451,6 +460,7 @@ void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
       AuxPoints=AuxPoints->next;
     }
   }
+  *FullPath=NULL;
   free(prev);
   free(heap);
   free(price);
