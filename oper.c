@@ -11,7 +11,6 @@
 void mainOper(Puzzles *Data, FILE *f){
   int * new_sol = NULL, *iniB =NULL, *fimB = NULL;
   int **new_solB = NULL;
-  PQueue **Queue = NULL;
   Puzzles *AuxP = NULL;
   lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL;
   Pos *SinglePos=NULL;
@@ -37,11 +36,10 @@ void mainOper(Puzzles *Data, FILE *f){
         SinglePos=AuxPos->next->data;
         fim=convertV(SinglePos->line, SinglePos->col, AuxP);
         /*runs Dijkstra algorithm to search minimum cost path*/
-        new_sol=searchPath(NewG, (Queue = iniPQ(NewG)), ini, fim);
+        new_sol=searchPath(NewG, ini, fim);
         /*prints the solution in the exit file*/
         printSolutions(f, new_sol, AuxP, ini, fim);
 
-        freePQ(Queue, NewG);
         freeGraph(NewG);
         NewG=NULL;
         free(new_sol);
@@ -69,8 +67,7 @@ void mainOper(Puzzles *Data, FILE *f){
           iniB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
           SinglePos=AuxPos->next->data;
           fimB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
-          new_solB[contador]=searchPath(NewG, (Queue = iniPQ(NewG)), iniB[contador], fimB[contador]);
-          freePQ(Queue, NewG);
+          new_solB[contador]=searchPath(NewG, iniB[contador], fimB[contador]);
           if(new_solB[contador]==NULL) break;
           AuxPos = AuxPos->next;
           contador++;
@@ -126,10 +123,9 @@ void mainOper(Puzzles *Data, FILE *f){
             NewG=NULL;
         }else{
           AllPoints = convertAllPoints(AuxP);
-          searchPathC(NewG, (Queue = iniPQ(NewG)), &AllPoints, &new_solC, AllPoints->data);
+          searchPathC(NewG, &AllPoints, &new_solC, AllPoints->data);
           printSolutionsC(f, new_solC, AuxP);
 
-          freePQ(Queue, NewG);
           freelList(new_solC);
           freeGraph(NewG);
           NewG=NULL;
@@ -167,7 +163,6 @@ int validateAllPoints(Puzzles *AuxP){
     }
     return 1;
 }
-
 /* convertAllPoints - converts path points in the entry file from coordinates to
                       absolute value (horizontal order)
   \param AuxP - Puzzle struct wich contains board values and path points
@@ -192,36 +187,67 @@ lList *convertAllPoints(Puzzles *AuxP){
   return lPoints;
 }
 
-PQueue **iniPQ(Graph *G){
-  PQueue **New = NULL;
-  lList *Aux = NULL;
-  int i = 0, j =0;
+int *IniHeap(int n){
+  int *Heap = NULL;
 
-  New = (PQueue **)malloc(G->V*sizeof(PQueue*));
-  if(New == NULL) exit(0);
+  Heap=(int *)malloc(n*sizeof(int));
+  if(Heap==NULL)
+    exit(0);
 
-  for(i=0; i<G->V; i++){
-    New[i]=(PQueue *)malloc(sizeof(PQueue ));
-    if (New[i] == NULL) exit(0);
-  }
-
-  for(i=0; i<G->V; i++){
-    Aux=G->adj[i];
-
-    if(Aux!=NULL){
-      New[j]->v=i;
-      New[j]->adj=Aux;
-      j++;
-    }else{
-      New[j]->v=i;
-      New[j]->adj=NULL;
-      j++;
-    }
-  }
-
-  return New;
+  return Heap;
 }
 
+void swap(int *n1, int *n2){
+  int i=0, j=0;
+  i=*n1;
+  j=*n2;
+  *n1=j;
+  *n2=i;
+}
+
+void Hinsert(int *Heap, int hsize, int *free, int n, int *price){
+  if((*free)<hsize){
+    Heap[*free]=n;
+    FixUp(Heap, *free, price);
+    (*free)++;
+  }
+}
+
+int HExtractMin(int *Heap, int hsize, int *price){
+  int n=0;
+  n=Heap[0];
+  swap(&Heap[0], &Heap[hsize-1]);
+  FixDown(Heap, 0, hsize-1, price);
+  return n;
+}
+
+void FixDown(int *Heap, int Idx, int N, int *price) {
+    int Child;
+    while(2*Idx < N-1) {
+        Child = 2*Idx+1;
+        if (Child < (N-1) && lessPri(price[Heap[Child]], price[Heap[Child+1]]))
+          Child++;
+        if (!lessPri(price[Heap[Idx]], price[Heap[Child]]))
+          break;
+        swap(&Heap[Idx], &Heap[Child]);
+        Idx = Child;
+    }
+}
+
+void FixUp(int *Heap, int Idx, int *price){
+  while (Idx > 0 && lessPri(price[Heap[(Idx-1)/2]], price[Heap[Idx]])){
+    swap(&Heap[Idx], &Heap[(Idx-1)/2]);
+    Idx = (Idx-1)/2;
+  }
+}
+
+int searchInHeap(int *heap, int hsize, int n){
+  int i =0 ;
+  for(i=0;i<hsize;i++){
+    if(heap[i]==n)
+      return i;
+  }
+}
 /** searchPath - runs Dijkstra algorithm to find the lowest cost path between 2
                 points
 
@@ -235,14 +261,15 @@ PQueue **iniPQ(Graph *G){
           point (if a point doesn't has a previous path points that point vertex
           position will contain -1)
 */
-int *searchPath(Graph *G, PQueue **Q, int source, int dest){
+int *searchPath(Graph *G, int source, int dest){
   int *price = NULL;
   int *prev = NULL, *visited = NULL;
-  int i=0, v=0;
+  int *heap=NULL;
+  int i=0, v=0, nfree=0, hsize=0;
   link *aux =NULL;
   lList *laux=NULL;
 
-  if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
+  if(G->adj[source]==NULL || G->adj[dest]==NULL || source==dest) return NULL;
 
   price=(int *)malloc(G->V*sizeof(int));
   if(price == NULL)
@@ -251,12 +278,6 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
     price[i]=INFINITY;
   }
 
-  visited=(int *)malloc(G->V*sizeof(int));
-  if(visited == NULL)
-    exit(0);
-  for(i=0; i<G->V; i++){
-    visited[i]=0;
-  }
   prev=(int *)malloc(G->V*sizeof(int));
   if(prev == NULL)
     exit(0);
@@ -264,42 +285,51 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
     prev[i]=-1;
   }
 
+  heap=IniHeap(G->V);
+  hsize=G->V;
   price[source]=0;
   v=source;
-
-  if (source==dest){
-    free(visited);
-    free(price);
-    return prev;
+  for(i=0; i<G->V; i++){
+    Hinsert(heap, hsize, &nfree, i, price);
   }
 
-  while (vEmpty(visited, G->V)==0){
 
-    v=searchMin(G->V, visited, price);
-    laux=Q[v]->adj;
+  while (hsize>0){
+
+    v=HExtractMin(heap, hsize, price);
+    hsize--;
+    laux=G->adj[v];
     aux=laux->data;
-    visited[v]=1;
 
     while(laux!=NULL){
       aux=laux->data;
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
+        i=searchInHeap(heap, hsize, aux->v);
+        if(price[heap[i]]<price[heap[(i-1)/2]])
+          FixUp(heap, i, price);
+        if((2*i)+1<hsize)
+            if(price[heap[i]]>price[heap[(2*i)+1]])
+                FixDown(heap, i, hsize, price);
+        if(2*(i+1)<hsize)
+            if(price[heap[i]]>price[heap[2*(i+1)]])
+              FixDown(heap, i, hsize, price);
         prev[aux->v]=v;
       }
 
       laux=laux->next;
     }
+
     if(prev[dest]!=-1){
-      free(visited);
+      free(heap);
       free(price);
       return prev;
     }
   }
-  free(visited);
+  free(heap);
   free(price);
   return prev;
 }
-
 /** searchPathC - runs Dijkstra algorithm to find lowest cost path to caint
                   multiple points specified in the entry file
 
@@ -313,10 +343,10 @@ int *searchPath(Graph *G, PQueue **Q, int source, int dest){
     \param ESource - Edge struct that contains the source point, in absolute
                     value, of the intended path
 */
-void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge *ESource){
+void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
   int *price = NULL;
-  int *prev = NULL, *visited = NULL;
-  int i=0, v=0, prevS=0;
+  int *prev = NULL, *heap=NULL;
+  int i=0, v=0, prevS=0, hsize=0, nfree=0;
   link *aux =NULL;
   lList *laux =NULL;
   lList *Point = *AllPoints;
@@ -338,42 +368,51 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
     price[i]=INFINITY;
   }
 
-  visited=(int *)malloc(G->V*sizeof(int));
-  if(visited == NULL) exit(0);
-  for(i=0; i<G->V; i++){
-    visited[i]=0;
-  }
-
   prev=(int *)malloc(G->V*sizeof(int));
   if(prev == NULL) exit(0);
   for(i=0; i<G->V; i++){
     prev[i]=-1;
   }
 
+  heap=IniHeap(G->V);
+  hsize=G->V;
   AuxE=ESource;
   price[AuxE->v]=0;
   v=AuxE->v;
-  prevS=v;
+    for(i=0; i<G->V; i++){
+    Hinsert(heap, hsize, &nfree, i, price);
+  }
+
+  prevS=heap[0];
   freeNode(AuxE, &Point);
 
   if(Point==NULL){
     free(prev);
-    free(visited);
     free(price);
+    free(heap);
     return;
   }
+    i=0;
 
-  while(Point!=NULL||vEmpty(visited, G->V)==0){
+  while(Point!=NULL&&hsize>0){
 
-    v=searchMin(G->V, visited, price);
-    laux=Q[v]->adj;
-    aux=laux->data;
-    visited[v]=1;
+    v=HExtractMin(heap, hsize, price);
+    laux=G->adj[v];
+    hsize--;
 
     while(laux!=NULL){
       aux=laux->data;
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
+        i=searchInHeap(heap, hsize, aux->v);
+        if(price[heap[i]]<price[heap[(i-1)/2]])
+          FixUp(heap, i, price);
+        if((2*i)+1<hsize)
+            if(price[heap[i]]>price[heap[(2*i)+1]])
+                FixDown(heap, i, hsize, price);
+        if(2*(i+1)<hsize)
+            if(price[heap[i]]>price[heap[2*(i+1)]])
+              FixDown(heap, i, hsize, price);
         prev[aux->v]=v;
       }
 
@@ -385,9 +424,9 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
       if(prev[AuxE->v]!=-1){
         addPathSol(prev, FullPath, prevS, AuxE->v);
         prevS=AuxE->v;
-        searchPathC(G, Q, &Point, FullPath, AuxE);
+        searchPathC(G, &Point, FullPath, AuxE);
         free(prev);
-        free(visited);
+        free(heap);
         free(price);
         return;
       }
@@ -395,7 +434,7 @@ void searchPathC(Graph *G, PQueue **Q, lList **AllPoints, lList **FullPath, Edge
     }
   }
   free(prev);
-  free(visited);
+  free(heap);
   free(price);
   return;
 }
@@ -416,7 +455,6 @@ void addPathPoint(lList **Path, int n){
     InsertListNode(&NewList, New);
     *Path=NewList;
 }
-
 
 void addPathSol(int *prev, lList **Path, int source, int n){
   Edge *New = NULL;

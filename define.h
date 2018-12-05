@@ -6,6 +6,7 @@
 #include <string.h>
 
 #define INFINITY 999999
+#define lessPri(A, B) ((A) > (B))
 
 typedef struct node link;
 typedef struct _graph Graph;
@@ -14,11 +15,6 @@ typedef struct _Pos Pos;
 typedef void * Item;
 typedef struct _lList lList;
 typedef struct _PQueue PQueue;
-
-struct _PQueue{
-  int v;
-  lList *adj;
-};
 
 struct node {
   int v;
