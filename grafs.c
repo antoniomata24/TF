@@ -58,21 +58,6 @@ Graph *createGraph (Puzzles *Data){
   return NewG;
 }
 
-int convertV(int x, int y,Puzzles *Data){
-
-  int n = 0;
-
-  n=x*Data->cols;
-  n+=y;
-
-  return n;
-}
-
-void invertConvertV(int n, Puzzles *Data, int *x, int *y){
-  (*x)=n/Data->cols;
-  (*y)=n-(*x)*Data->cols;
-}
-
 void NEW(int v, lList **next, int weight){
   link *x = (link *) malloc(sizeof(struct node));
   x->weight=weight;
@@ -106,4 +91,19 @@ int ValidateMoveA(int x, int y, int difx, int dify, Puzzles *Data){
   }else{
     return 1;
   }
+}
+
+int convertV(int x, int y,Puzzles *Data){
+
+  int n = 0;
+
+  n=x*Data->cols;
+  n+=y;
+
+  return n;
+}
+
+void invertConvertV(int n, Puzzles *Data, int *x, int *y){
+  (*x)=n/Data->cols;
+  (*y)=n-(*x)*Data->cols;
 }

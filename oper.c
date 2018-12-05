@@ -40,6 +40,7 @@ void mainOper(Puzzles *Data, FILE *f){
         /*prints the solution in the exit file*/
         printSolutions(f, new_sol, AuxP, ini, fim);
 
+        /*freeing of the memory used*/
         freeGraph(NewG);
         NewG=NULL;
         free(new_sol);
@@ -47,33 +48,37 @@ void mainOper(Puzzles *Data, FILE *f){
         break;
 
       case 'B':
-
+        /*allocation for all the paths and all the initial and final points*/
         new_solB = (int**)malloc((AuxP->nmoves)*sizeof(int*));
         if (new_solB==NULL) exit(0);
         iniB = (int*)malloc((AuxP->nmoves)*sizeof(int));
         if (iniB==NULL) exit(0);
         fimB = (int*)malloc((AuxP->nmoves)*sizeof(int));
         if (fimB==NULL) exit(0);
-
+        /*reinitialize of the variables needed*/
         contador=0;
         custo=0;
         passos=0;
         inv=0;
         tallocs=0;
 
+        /*while there are still more paths to analyse*/
         while (AuxPos->next!=NULL){
           new_solB[contador]=NULL;
+          /*creating the path between the initial point and final point on the [contador] path*/
           SinglePos=AuxPos->data;
           iniB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
           SinglePos=AuxPos->next->data;
           fimB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
           new_solB[contador]=searchPath(NewG, iniB[contador], fimB[contador]);
+          /*if there is no solution to that path*/
           if(new_solB[contador]==NULL) break;
+          /*iterate to the next path*/
           AuxPos = AuxPos->next;
           contador++;
           tallocs++;
         }
-
+        /*verify if there are any paths that are not valid, if there are print the invalid solution*/
         for (contador=0; contador<AuxP->nmoves-1; contador++){
           if(new_solB[contador]==NULL) {
             printSolutions(f, NULL, AuxP, 0, 0);
@@ -81,28 +86,36 @@ void mainOper(Puzzles *Data, FILE *f){
             break;
           }
         }
-
+        /*if there are no invalid paths, proceeds to print the solution*/
         if(inv==0){
+          /*iterate all the paths*/
           for (contador = (AuxP->nmoves)-2; contador >= 0; contador--){
             n = fimB[contador];
+            /*adding all the totals from the paths*/
             while(n!=iniB[contador]){
+              /*convert the index (n) to coordinates from the matrix*/
               invertConvertV(n, AuxP, &x, &y);
               custo += AuxP->board[x][y];
               passos++;
               n = new_solB[contador][n];
             }
           }
+          /*prints the solution*/
           for (contador=0; contador<AuxP->nmoves-1; contador++){
             if (contador == 0){
+              /*prints the 1st line*/
               printSolutionsB(f, new_solB[contador], AuxP, iniB[contador], fimB[contador], custo, passos);
+              /*prints 1st path*/
               printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
             } else {
+              /*prints the rest of the paths*/
               printSolutionsBSteps(f, new_solB[contador], AuxP, iniB[contador], fimB[contador]);
             }
           }
+          /*pritns the spacing between solutions*/
           fprintf(f,"\n");
         }
-
+        /*freeing all the memory used*/
         for (i=0; i<tallocs; i++){
           free(new_solB[i]);
         }
@@ -114,28 +127,33 @@ void mainOper(Puzzles *Data, FILE *f){
         break;
 
       case 'C':
+        /*reinitializing variables*/
         AllPoints=NULL;
         new_solC=NULL;
-
+        /*if there are invalid points in the moves prints the invalid solution*/
         if(validateAllPoints(AuxP)==0){
             printSolutions(f, NULL, AuxP, 0, 0);
             freeGraph(NewG);
             NewG=NULL;
         }else{
+          /*converts al the points to an abstract list*/
           AllPoints = convertAllPoints(AuxP);
+          /*searches the paths between all the points*/
           searchPathC(NewG, &AllPoints, &new_solC, AllPoints->data);
+          /*prints the solutions found*/
           printSolutionsC(f, new_solC, AuxP);
-
+          /*freeing all the memory used*/
           freelList(new_solC);
           freeGraph(NewG);
           NewG=NULL;
         }
         break;
       default:
+        /*if the mode is invalid prints the invalid solution*/
         printSolutions(f, NULL, AuxP, 0, 0);
         break;
     }
-
+    /*iterates to the next matrix*/
     AuxP=AuxP->nPuzzle;
   }
 
