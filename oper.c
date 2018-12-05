@@ -295,20 +295,27 @@ int *searchPath(Graph *G, int source, int dest){
   link *aux =NULL;
   lList *laux=NULL;
 
-  if(G->adj[source]==NULL || G->adj[dest]==NULL || source==dest) return NULL;
-
-  price=(int *)malloc(G->V*sizeof(int));
-  if(price == NULL)
-    exit(0);
-  for(i=0; i<G->V; i++){
-    price[i]=INFINITY;
-  }
+  if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
   prev=(int *)malloc(G->V*sizeof(int));
   if(prev == NULL)
     exit(0);
   for(i=0; i<G->V; i++){
     prev[i]=-1;
+  }
+
+  if(source==dest){
+    for(i=0; i<G->V; i++){
+      prev[i]=0;
+    }
+    return prev;
+  }
+
+  price=(int *)malloc(G->V*sizeof(int));
+  if(price == NULL)
+    exit(0);
+  for(i=0; i<G->V; i++){
+    price[i]=INFINITY;
   }
 
   heap=IniHeap(G->V);
