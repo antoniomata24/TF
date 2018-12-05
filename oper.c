@@ -16,7 +16,7 @@ void mainOper(Puzzles *Data, FILE *f){
   Pos *SinglePos=NULL;
   Graph *NewG = NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
-  int tallocs=0;
+  int tallocs=0, lastN=0;
 
   AuxP = Data;
   if (AuxP == NULL) exit(0);
@@ -41,6 +41,13 @@ void mainOper(Puzzles *Data, FILE *f){
           printSolutions(f, new_sol, AuxP, 0, 0);
           free(new_sol);
           freeGraph(NewG);
+          NewG=NULL;
+          break;
+        }
+        if(AuxP->nmoves!=2){
+          printSolutions(f, NULL, AuxP, 0, 0);
+          freeGraph(NewG);
+          NewG=NULL;
           break;
         }
         /*runs Dijkstra algorithm to search minimum cost path*/
@@ -69,6 +76,7 @@ void mainOper(Puzzles *Data, FILE *f){
         passos=0;
         inv=0;
         tallocs=0;
+        lastN=0;
 
         /*while there are still more paths to analyse*/
         while (AuxPos->next!=NULL){
@@ -86,12 +94,24 @@ void mainOper(Puzzles *Data, FILE *f){
           contador++;
           tallocs++;
         }
-        /*verify if there are any paths that are not valid, if there are print the invalid solution*/
-        for (contador=0; contador<AuxP->nmoves-1; contador++){
-          if(new_solB[contador]==NULL) {
+        i=iniB[contador-1];
+        while(new_solB[contador-1][new_solB[contador-1][i]]!=-1){
+          i=new_solB[contador-1][i];
+        }
+        lastN=fimB[contador-1];
+
+        if(AuxP->nmoves<3 || i!=lastN){
             printSolutions(f, NULL, AuxP, 0, 0);
             inv=1;
-            break;
+        }
+        /*verify if there are any paths that are not valid, if there are print the invalid solution*/
+        if(inv==0){
+          for (contador=0; contador<AuxP->nmoves-1; contador++){
+            if(new_solB[contador]==NULL) {
+              printSolutions(f, NULL, AuxP, 0, 0);
+              inv=1;
+              break;
+            }
           }
         }
         /*if there are no invalid paths, proceeds to print the solution*/
@@ -139,7 +159,7 @@ void mainOper(Puzzles *Data, FILE *f){
         AllPoints=NULL;
         new_solC=NULL;
         /*if there are invalid points in the moves prints the invalid solution*/
-        if(validateAllPoints(AuxP)==0){
+        if(validateAllPoints(AuxP)==0 || AuxP->nmoves<3){
             printSolutions(f, NULL, AuxP, 0, 0);
             freeGraph(NewG);
             NewG=NULL;
