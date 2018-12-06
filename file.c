@@ -120,11 +120,13 @@ void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
     return;
   }
 
-  while(n!=ini){
-    invertConvertV(n, Puzzle, &x, &y);
-    custo += Puzzle->board[x][y];
-    passos++;
-    n=sol[n];
+  if(ini!=fim){
+    while(n!=ini){
+      invertConvertV(n, Puzzle, &x, &y);
+      custo += Puzzle->board[x][y];
+      passos++;
+      n=sol[n];
+      }
   }
 
   fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,

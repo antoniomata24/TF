@@ -19,6 +19,7 @@ void addPathPoint(lList **, int );
 void addPathSol(int *, lList **,int , int );
 int searchMin(int , int *, int *);
 int vEmpty(int *, int );
+int **matrixInit(int , int , int );
 
 
 #endif

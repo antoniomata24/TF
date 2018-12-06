@@ -40,21 +40,11 @@ void mainOper(Puzzles *Data, FILE *f){
         ini=convertV(SinglePos->line, SinglePos->col, AuxP);
         SinglePos=AuxPos->next->data;
         fim=convertV(SinglePos->line, SinglePos->col, AuxP);
-        if(ini==fim){
-          new_sol=(int *)malloc(sizeof(int));
-          new_sol[0]=0;
-          printSolutions(f, new_sol, AuxP, 0, 0);
-          free(new_sol);
-          freeGraph(NewG);
-          NewG=NULL;
-          break;
-        }
 
         /*runs Dijkstra algorithm to search minimum cost path*/
         new_sol=searchPath(NewG, ini, fim);
         /*prints the solution in the exit file*/
         printSolutions(f, new_sol, AuxP, ini, fim);
-
         /*freeing of the memory used*/
         freeGraph(NewG);
         NewG=NULL;
@@ -79,44 +69,46 @@ void mainOper(Puzzles *Data, FILE *f){
         inv=0;
         tallocs=0;
 
-        /*while there are still more paths to analyse*/
-        while (AuxPos->next!=NULL){
-          new_solB[contador]=NULL;
-          /*creating the path between the initial point and final point on the [contador] path*/
-          SinglePos=AuxPos->data;
-          iniB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
-          SinglePos=AuxPos->next->data;
-          fimB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
-          new_solB[contador]=searchPath(NewG, iniB[contador], fimB[contador]);
-          /*if there is no solution to that path*/
-          if(new_solB[contador]==NULL) break;
-          /*iterate to the next path*/
-          AuxPos = AuxPos->next;
-          contador++;
-          tallocs++;
-        }
-
         if(AuxP->nmoves<2){
             printSolutions(f, NULL, AuxP, 0, 0);
             inv=1;
         }
-        /*verify if there are any paths that are not valid, if there are print the invalid solution*/
+        /*if there are no invalid paths, proceeds to print the solution*/
         if(inv==0){
-          for (contador=0; contador<AuxP->nmoves-1; contador++){/*
-            for(i=0; i<newG->V; i++){
-              inv=1;
-              if (new_solB[contador][i]!=-1) break;
-            }*/
-            if(new_solB[contador]==NULL) {
-              printSolutions(f, NULL, AuxP, 0, 0);
+          /*while there are still more paths to analyse*/
+          while (AuxPos->next!=NULL){
+            new_solB[contador]=NULL;
+            /*creating the path between the initial point and final point on the [contador] path*/
+            SinglePos=AuxPos->data;
+            iniB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
+            SinglePos=AuxPos->next->data;
+            fimB[contador]=convertV(SinglePos->line, SinglePos->col, AuxP);
+            new_solB[contador]=searchPath(NewG, iniB[contador], fimB[contador]);
+            /*if there is no solution to that path*/
+            if(new_solB[contador]==NULL){
               inv=1;
               break;
             }
-            if(inv==1) break;
+            /*iterate to the next path*/
+            AuxPos = AuxPos->next;
+            contador++;
+            tallocs++;
           }
-        }
-        /*if there are no invalid paths, proceeds to print the solution*/
-        if(inv==0){
+
+        /*verify if there are any paths that are not valid, if there are print the invalid solution*/
+          if (inv==1){
+            printSolutions(f, NULL, AuxP, 0, 0);
+            /*freeing all the memory used*/
+            for (i=0; i<tallocs; i++){
+              free(new_solB[i]);
+            }
+            freeGraph(NewG);
+            NewG=NULL;
+            free(new_solB);
+            free(iniB);
+            free(fimB);
+            break;
+          }
           /*iterate all the paths*/
           for (contador = (AuxP->nmoves)-2; contador >= 0; contador--){
             n = fimB[contador];
@@ -252,7 +244,7 @@ void swap(int *n1, int *n2){
   *n2=i;
 }
 
-void Hinsert(int *Heap, int hsize, int *free, int n, int *price){
+void Hinsert(int *Heap, int hsize, int *free, int n, int *price, int *posInH){
   if((*free)<hsize){
     Heap[*free]=n;
     FixUp(Heap, *free, price);
@@ -268,7 +260,7 @@ int HExtractMin(int *Heap, int hsize, int *price){
   return n;
 }
 
-void FixDown(int *Heap, int Idx, int N, int *price) {
+void FixDown(int *Heap, int Idx, int N, int *price, int *posinH) {
     int Child;
     while(2*Idx < N-1) {
         Child = 2*Idx+1;
@@ -279,13 +271,16 @@ void FixDown(int *Heap, int Idx, int N, int *price) {
         swap(&Heap[Idx], &Heap[Child]);
         Idx = Child;
     }
+
 }
 
-void FixUp(int *Heap, int Idx, int *price){
+void FixUp(int *Heap, int Idx, int *price, int *posInH){
+  int i = Idx;
   while (Idx > 0 && lessPri(price[Heap[(Idx-1)/2]], price[Heap[Idx]])){
     swap(&Heap[Idx], &Heap[(Idx-1)/2]);
     Idx = (Idx-1)/2;
   }
+  posinH[i]=IdX;
 }
 
 int searchInHeap(int *heap, int hsize, int n){
@@ -318,18 +313,13 @@ int *searchPath(Graph *G, int source, int dest){
 
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
-  prev=(int *)malloc(G->V*sizeof(int));
-  if(prev == NULL)
-    exit(0);
-  for(i=0; i<G->V; i++){
-    prev[i]=-1;
-  }
-
   if(source==dest){
-    for(i=0; i<G->V; i++){
-      prev[i]=0;
-    }
+    prev = (int*)calloc(1,sizeof(int));
     return prev;
+  } else{
+    prev=(int *)malloc(G->V*sizeof(int));
+    if(prev == NULL)
+      exit(0);
   }
 
   price=(int *)malloc(G->V*sizeof(int));
@@ -337,14 +327,17 @@ int *searchPath(Graph *G, int source, int dest){
     exit(0);
   for(i=0; i<G->V; i++){
     price[i]=INFINITY;
+    prev[i]=-1;
   }
 
   heap=IniHeap(G->V);
   hsize=G->V;
   price[source]=0;
   v=source;
+
+  int *posInH = (int *)malloc(G->V*sizeof(int));
   for(i=0; i<G->V; i++){
-    Hinsert(heap, hsize, &nfree, i, price);
+    Hinsert(heap, hsize, &nfree, i, price, posInH);
   }
 
 
@@ -353,10 +346,7 @@ int *searchPath(Graph *G, int source, int dest){
     v=HExtractMin(heap, hsize, price);
     hsize--;
     laux=G->adj[v];
-    if (laux==NULL){/*
-      for(i=0; i<G->V; i++){
-        prev[i]=-1;
-      }*/
+    if (laux==NULL){
       break;
     }
     aux=laux->data;
@@ -409,8 +399,8 @@ void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
   int **prices = NULL;
   int **paths = NULL;
 
-  prices=matrixInit(G->v, G->v, INFINITY);
-  paths=matrixInit(G->v, G->v, G->v);
+  prices=matrixInit(G->V, G->V, INFINITY);
+  paths=matrixInit(G->V, G->V, G->V);
 
 }
 
