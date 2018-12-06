@@ -15,8 +15,9 @@ void mainOper(Puzzles *Data, FILE *f){
   lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL;
   Pos *SinglePos=NULL;
   Graph *NewG = NULL;
+  MGraph *NewMG=NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
-  int tallocs=0, lastN=0;
+  int tallocs=0;
 
   AuxP = Data;
   if (AuxP == NULL) exit(0);
@@ -25,11 +26,15 @@ void mainOper(Puzzles *Data, FILE *f){
     AuxPos = AuxP->Positions;
     /*Creates Graph to all the eligible points in the puzzle and their possible
     moves*/
-    NewG = createGraph(AuxP);
     contador = 0;
 
     switch (AuxP->mode) {
       case 'A':
+        if(AuxP->nmoves!=2){
+          printSolutions(f, NULL, AuxP, 0, 0);
+          break;
+        }
+        NewG = createGraph(AuxP);
         /*converts initial and final points of the intended path*/
         SinglePos=AuxPos->data;
         ini=convertV(SinglePos->line, SinglePos->col, AuxP);
@@ -44,12 +49,7 @@ void mainOper(Puzzles *Data, FILE *f){
           NewG=NULL;
           break;
         }
-        if(AuxP->nmoves!=2){
-          printSolutions(f, NULL, AuxP, 0, 0);
-          freeGraph(NewG);
-          NewG=NULL;
-          break;
-        }
+
         /*runs Dijkstra algorithm to search minimum cost path*/
         new_sol=searchPath(NewG, ini, fim);
         /*prints the solution in the exit file*/
@@ -63,6 +63,8 @@ void mainOper(Puzzles *Data, FILE *f){
         break;
 
       case 'B':
+
+        NewG = createGraph(AuxP);
         /*allocation for all the paths and all the initial and final points*/
         new_solB = (int**)malloc((AuxP->nmoves)*sizeof(int*));
         if (new_solB==NULL) exit(0);
@@ -76,7 +78,6 @@ void mainOper(Puzzles *Data, FILE *f){
         passos=0;
         inv=0;
         tallocs=0;
-        lastN=0;
 
         /*while there are still more paths to analyse*/
         while (AuxPos->next!=NULL){
@@ -94,24 +95,24 @@ void mainOper(Puzzles *Data, FILE *f){
           contador++;
           tallocs++;
         }
-        i=iniB[contador-1];
-        while(new_solB[contador-1][new_solB[contador-1][i]]!=-1){
-          i=new_solB[contador-1][i];
-        }
-        lastN=fimB[contador-1];
 
-        if(AuxP->nmoves<3 || i!=lastN){
+        if(AuxP->nmoves<2){
             printSolutions(f, NULL, AuxP, 0, 0);
             inv=1;
         }
         /*verify if there are any paths that are not valid, if there are print the invalid solution*/
         if(inv==0){
-          for (contador=0; contador<AuxP->nmoves-1; contador++){
+          for (contador=0; contador<AuxP->nmoves-1; contador++){/*
+            for(i=0; i<newG->V; i++){
+              inv=1;
+              if (new_solB[contador][i]!=-1) break;
+            }*/
             if(new_solB[contador]==NULL) {
               printSolutions(f, NULL, AuxP, 0, 0);
               inv=1;
               break;
             }
+            if(inv==1) break;
           }
         }
         /*if there are no invalid paths, proceeds to print the solution*/
@@ -159,7 +160,7 @@ void mainOper(Puzzles *Data, FILE *f){
         AllPoints=NULL;
         new_solC=NULL;
         /*if there are invalid points in the moves prints the invalid solution*/
-        if(validateAllPoints(AuxP)==0 || AuxP->nmoves<3){
+        if(validateAllPoints(AuxP)==0 || AuxP->nmoves<2){
             printSolutions(f, NULL, AuxP, 0, 0);
             freeGraph(NewG);
             NewG=NULL;
@@ -352,6 +353,12 @@ int *searchPath(Graph *G, int source, int dest){
     v=HExtractMin(heap, hsize, price);
     hsize--;
     laux=G->adj[v];
+    if (laux==NULL){/*
+      for(i=0; i<G->V; i++){
+        prev[i]=-1;
+      }*/
+      break;
+    }
     aux=laux->data;
 
     while(laux!=NULL){
@@ -381,6 +388,8 @@ int *searchPath(Graph *G, int source, int dest){
   }
   free(heap);
   free(price);
+  free(prev);
+  prev=NULL;
   return prev;
 }
 /** searchPathC - runs Dijkstra algorithm to find lowest cost path to caint
@@ -397,101 +406,33 @@ int *searchPath(Graph *G, int source, int dest){
                     value, of the intended path
 */
 void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
-  int *price = NULL;
-  int *prev = NULL, *heap=NULL;
-  int i=0, v=0, prevS=0, hsize=0, nfree=0;
-  link *aux =NULL;
-  lList *laux =NULL;
-  lList *Point = *AllPoints;
-  lList *AuxPoints = *AllPoints;
-  lList *FinalPath = *FullPath;
-  Edge *AuxE=NULL;
+  int **prices = NULL;
+  int **paths = NULL;
 
-  if(AllPoints==NULL)
-    return;
+  prices=matrixInit(G->v, G->v, INFINITY);
+  paths=matrixInit(G->v, G->v, G->v);
 
-  AuxE=Point->data;
+}
 
-  if(G->adj[AuxE->v]==NULL){
-    return;
+int **matrixInit(int cols, int lines, int n){
+
+  int **aux = NULL;
+  int i = 0, j=0;
+
+  aux=(int **)malloc(lines*sizeof(int*));
+  for(i=0;i<lines;i++){
+    aux[i]=(int*)malloc(cols*sizeof(int *));
+    if(aux[i]==NULL)
+      exit(0);
   }
 
-  price=(int *)malloc(G->V*sizeof(int));
-  if(price == NULL) exit(0);
-  for(i=0; i<G->V; i++){
-    price[i]=INFINITY;
-  }
-
-  prev=(int *)malloc(G->V*sizeof(int));
-  if(prev == NULL) exit(0);
-  for(i=0; i<G->V; i++){
-    prev[i]=-1;
-  }
-
-  heap=IniHeap(G->V);
-  hsize=G->V;
-  AuxE=ESource;
-  price[AuxE->v]=0;
-  v=AuxE->v;
-  for(i=0; i<G->V; i++){
-    Hinsert(heap, hsize, &nfree, i, price);
-  }
-
-  prevS=heap[0];
-  freeNode(AuxE, &Point);
-
-  if(Point==NULL){
-    free(prev);
-    free(price);
-    free(heap);
-    return;
-  }
-    i=0;
-
-  while(Point!=NULL&&hsize>0){
-
-    v=HExtractMin(heap, hsize, price);
-    laux=G->adj[v];
-    hsize--;
-
-    while(laux!=NULL){
-      aux=laux->data;
-      if(price[aux->v]>aux->weight+price[v]){
-        price[aux->v]=aux->weight+price[v];
-        i=searchInHeap(heap, hsize, aux->v);
-        if(price[heap[i]]<price[heap[(i-1)/2]])
-          FixUp(heap, i, price);
-        if((2*i)+1<hsize)
-            if(price[heap[i]]>price[heap[(2*i)+1]])
-                FixDown(heap, i, hsize, price);
-        if(2*(i+1)<hsize)
-            if(price[heap[i]]>price[heap[2*(i+1)]])
-              FixDown(heap, i, hsize, price);
-        prev[aux->v]=v;
-      }
-
-      laux=laux->next;
-    }
-    AuxPoints=Point;
-    while (AuxPoints!=NULL){
-      AuxE=AuxPoints->data;
-      if(prev[AuxE->v]!=-1){
-        addPathSol(prev, FullPath, prevS, AuxE->v);
-        prevS=AuxE->v;
-        searchPathC(G, &Point, FullPath, AuxE);
-        free(prev);
-        free(heap);
-        free(price);
-        return;
-      }
-      AuxPoints=AuxPoints->next;
+  for(i=0;i<lines;i++){
+    for(j=0;j<cols;j++){
+      aux[i][j]=n;
     }
   }
-  *FullPath=NULL;
-  free(prev);
-  free(heap);
-  free(price);
-  return;
+
+  return aux;
 }
 
 /* addPathPoint - add a single point to the Path list computed by the "searchPathC"

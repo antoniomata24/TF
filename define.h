@@ -10,6 +10,7 @@
 
 typedef struct node link;
 typedef struct _graph Graph;
+typedef struct _mraph MGraph;
 typedef struct _Puzzles Puzzles;
 typedef struct _Pos Pos;
 typedef void * Item;
@@ -25,6 +26,12 @@ struct _graph{
   int V;
   int E;
   lList **adj;
+};
+
+struct _mgraph{
+  int V;
+  int E;
+  int **adj;
 };
 
 typedef struct _edge{
