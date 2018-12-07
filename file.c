@@ -5,7 +5,7 @@ Puzzles *readFile(char *nomef){
   FILE *fi = NULL;
   Puzzles *AllPuzzle = NULL;
   Puzzles *AuxPuzzle, *NewPuzzle = NULL;
-  Pos *AuxPos = NULL, *NewPos = NULL;
+  Pos *NewPos = NULL;
 
   int nCols, nLines, moves;
   char mode;
