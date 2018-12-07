@@ -244,7 +244,7 @@ void swap(int *n1, int *n2){
   *n2=i;
 }
 
-void Hinsert(int *Heap, int hsize, int *free, int n, int *price, int *posInH){
+void Hinsert(int *Heap, int hsize, int *free, int n, int *price){
   if((*free)<hsize){
     Heap[*free]=n;
     FixUp(Heap, *free, price);
@@ -260,7 +260,7 @@ int HExtractMin(int *Heap, int hsize, int *price){
   return n;
 }
 
-void FixDown(int *Heap, int Idx, int N, int *price, int *posinH) {
+void FixDown(int *Heap, int Idx, int N, int *price) {
     int Child;
     while(2*Idx < N-1) {
         Child = 2*Idx+1;
@@ -274,13 +274,13 @@ void FixDown(int *Heap, int Idx, int N, int *price, int *posinH) {
 
 }
 
-void FixUp(int *Heap, int Idx, int *price, int *posInH){
+void FixUp(int *Heap, int Idx, int *price){
   int i = Idx;
   while (Idx > 0 && lessPri(price[Heap[(Idx-1)/2]], price[Heap[Idx]])){
     swap(&Heap[Idx], &Heap[(Idx-1)/2]);
     Idx = (Idx-1)/2;
-  }
-  posinH[i]=IdX;
+  }/*
+  posinH[i]=IdX;*/
 }
 
 int searchInHeap(int *heap, int hsize, int n){
@@ -334,10 +334,10 @@ int *searchPath(Graph *G, int source, int dest){
   hsize=G->V;
   price[source]=0;
   v=source;
-
-  int *posInH = (int *)malloc(G->V*sizeof(int));
+/*
+  int *posInH = (int *)malloc(G->V*sizeof(int));*/
   for(i=0; i<G->V; i++){
-    Hinsert(heap, hsize, &nfree, i, price, posInH);
+    Hinsert(heap, hsize, &nfree, i, price);
   }
 
 
@@ -356,6 +356,7 @@ int *searchPath(Graph *G, int source, int dest){
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
         i=searchInHeap(heap, hsize, aux->v);
+        /*i=aux->v;*/
         if(price[heap[i]]<price[heap[(i-1)/2]])
           FixUp(heap, i, price);
         if((2*i)+1<hsize)
