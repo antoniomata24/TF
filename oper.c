@@ -15,7 +15,6 @@ void mainOper(Puzzles *Data, FILE *f){
   lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL;
   Pos *SinglePos=NULL;
   Graph *NewG = NULL;
-  MGraph *NewMG=NULL;
   int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
   int tallocs=0;
 
@@ -236,44 +235,59 @@ int *IniHeap(int n){
   return Heap;
 }
 
-void swap(int *n1, int *n2){
+void swap(int **heap, int **posInH, int n1, int n2){
   int i=0, j=0;
-  i=*n1;
-  j=*n2;
-  *n1=j;
-  *n2=i;
+  int *auxH = *heap;
+  int *auxP = *posInH;
+  i=auxH[n1];
+  j=auxH[n2];
+
+  auxP[i]=n2;
+  auxP[j]=n1;
+  auxH[n1]=j;
+  auxH[n2]=i;
 }
 
+<<<<<<< HEAD
 void Hinsert(int *Heap, int hsize, int *free, int n, int *price){
+=======
+void Hinsert(int **Heap, int hsize, int *free, int n, int *price, int **posInH){
+>>>>>>> mata
   if((*free)<hsize){
-    Heap[*free]=n;
-    FixUp(Heap, *free, price);
+    (*Heap)[*free]=n;
+    (*posInH)[n]=*free;
+    FixUp(Heap, *free, price, posInH);
     (*free)++;
   }
 }
 
-int HExtractMin(int *Heap, int hsize, int *price){
+int HExtractMin(int **Heap, int hsize, int *price, int **posinH){
   int n=0;
-  n=Heap[0];
-  swap(&Heap[0], &Heap[hsize-1]);
-  FixDown(Heap, 0, hsize-1, price);
+  n=*Heap[0];
+  swap(Heap, posinH, 0, hsize-1);
+  FixDown(Heap, 0, hsize-1, price, posinH);
   return n;
 }
 
+<<<<<<< HEAD
 void FixDown(int *Heap, int Idx, int N, int *price) {
+=======
+void FixDown(int **Heap, int Idx, int N, int *price, int **posinH) {
+>>>>>>> mata
     int Child;
     while(2*Idx < N-1) {
         Child = 2*Idx+1;
-        if (Child < (N-1) && lessPri(price[Heap[Child]], price[Heap[Child+1]]))
+        if (Child < (N-1) && lessPri(price[(*Heap)[Child]], price[(*Heap)[Child+1]]))
           Child++;
-        if (!lessPri(price[Heap[Idx]], price[Heap[Child]]))
+        if (!lessPri(price[(*Heap)[Idx]], price[(*Heap)[Child]]))
           break;
-        swap(&Heap[Idx], &Heap[Child]);
+        swap(Heap, posinH, Idx, Child);
         Idx = Child;
     }
 
 }
 
+<<<<<<< HEAD
 void FixUp(int *Heap, int Idx, int *price){
   int i = Idx;
   while (Idx > 0 && lessPri(price[Heap[(Idx-1)/2]], price[Heap[Idx]])){
@@ -281,6 +295,13 @@ void FixUp(int *Heap, int Idx, int *price){
     Idx = (Idx-1)/2;
   }/*
   posinH[i]=IdX;*/
+=======
+void FixUp(int **Heap, int Idx, int *price, int **posInH){
+  while (Idx > 0 && lessPri(price[(*Heap)[(Idx-1)/2]], price[(*Heap)[Idx]])){
+    swap(Heap, posInH, Idx, (Idx-1)/2);
+    Idx = (Idx-1)/2;
+  }
+>>>>>>> mata
 }
 
 int searchInHeap(int *heap, int hsize, int n){
@@ -289,6 +310,7 @@ int searchInHeap(int *heap, int hsize, int n){
     if(heap[i]==n)
       return i;
   }
+  return 0;
 }
 /** searchPath - runs Dijkstra algorithm to find the lowest cost path between 2
                 points
@@ -305,7 +327,7 @@ int searchInHeap(int *heap, int hsize, int n){
 */
 int *searchPath(Graph *G, int source, int dest){
   int *price = NULL;
-  int *prev = NULL, *visited = NULL;
+  int *prev = NULL;
   int *heap=NULL;
   int i=0, v=0, nfree=0, hsize=0;
   link *aux =NULL;
@@ -321,29 +343,37 @@ int *searchPath(Graph *G, int source, int dest){
     if(prev == NULL)
       exit(0);
   }
-
+  int *posInH = (int *)malloc(G->V*sizeof(int));
   price=(int *)malloc(G->V*sizeof(int));
   if(price == NULL)
     exit(0);
   for(i=0; i<G->V; i++){
     price[i]=INFINITY;
     prev[i]=-1;
+    posInH[i]=-1;
   }
 
   heap=IniHeap(G->V);
   hsize=G->V;
   price[source]=0;
   v=source;
+<<<<<<< HEAD
 /*
   int *posInH = (int *)malloc(G->V*sizeof(int));*/
   for(i=0; i<G->V; i++){
     Hinsert(heap, hsize, &nfree, i, price);
+=======
+
+
+  for(i=0; i<G->V; i++){
+    Hinsert(&heap, hsize, &nfree, i, price, &posInH);
+>>>>>>> mata
   }
 
 
   while (hsize>0){
 
-    v=HExtractMin(heap, hsize, price);
+    v=HExtractMin(&heap, hsize, price, &posInH);
     hsize--;
     laux=G->adj[v];
     if (laux==NULL){
@@ -355,16 +385,20 @@ int *searchPath(Graph *G, int source, int dest){
       aux=laux->data;
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
+<<<<<<< HEAD
         i=searchInHeap(heap, hsize, aux->v);
         /*i=aux->v;*/
+=======
+        i=posInH[aux->v];
+>>>>>>> mata
         if(price[heap[i]]<price[heap[(i-1)/2]])
-          FixUp(heap, i, price);
+          FixUp(&heap, i, price, &posInH);
         if((2*i)+1<hsize)
             if(price[heap[i]]>price[heap[(2*i)+1]])
-                FixDown(heap, i, hsize, price);
+                FixDown(&heap, i, hsize, price, &posInH);
         if(2*(i+1)<hsize)
             if(price[heap[i]]>price[heap[2*(i+1)]])
-              FixDown(heap, i, hsize, price);
+              FixDown(&heap, i, hsize, price, &posInH);
         prev[aux->v]=v;
       }
 
@@ -397,7 +431,7 @@ int *searchPath(Graph *G, int source, int dest){
                     value, of the intended path
 */
 void searchPathC(Graph *G, lList **AllPoints, lList **FullPath, Edge *ESource){
-  int **prices = NULL;
+/*  int **prices = NULL;
   int **paths = NULL;
 
   prices=matrixInit(G->V, G->V, INFINITY);
@@ -423,7 +457,7 @@ int **matrixInit(int cols, int lines, int n){
     }
   }
 
-  return aux;
+  return aux;*/
 }
 
 /* addPathPoint - add a single point to the Path list computed by the "searchPathC"
@@ -444,8 +478,6 @@ void addPathPoint(lList **Path, int n){
 }
 
 void addPathSol(int *prev, lList **Path, int source, int n){
-  Edge *New = NULL;
-  lList *NewList = *Path;
 
   if(n==source)
     return;
