@@ -29,7 +29,7 @@ void mainOper(Puzzles *Data, FILE *f){
 
     switch (AuxP->mode) {
       case 'A':
-        if(AuxP->nmoves!=2){
+        if(AuxP->nmoves!=2 || validateAllPoints(AuxP)==0){
           printSolutions(f, NULL, AuxP, 0, 0);
           break;
         }
@@ -68,7 +68,7 @@ void mainOper(Puzzles *Data, FILE *f){
         inv=0;
         tallocs=0;
 
-        if(AuxP->nmoves<2){
+        if(AuxP->nmoves<2 || validateAllPoints(AuxP)==0){
             printSolutions(f, NULL, AuxP, 0, 0);
             inv=1;
         }
@@ -378,11 +378,13 @@ int *searchPath(Graph *G, int source, int dest){
     if(prev[dest]!=-1){
       free(heap);
       free(price);
+      free(posInH);
       return prev;
     }
   }
   free(heap);
   free(price);
+  free(posInH);
   free(prev);
   prev=NULL;
   return prev;
