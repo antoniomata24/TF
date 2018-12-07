@@ -56,8 +56,7 @@ void freeAllPuzzle(Puzzles *Data){
     return;
 
   int i = 0;
-
-  freeAllPuzzle(Data->nPuzzle);
+  
   freelList(Data->Positions);
 
   if(Data->board!=NULL){

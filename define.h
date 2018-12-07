@@ -51,7 +51,6 @@ struct _Puzzles{
   int cols;
   lList *Positions;
   int **board;
-  Puzzles *nPuzzle;
 };
 
 struct _Pos{

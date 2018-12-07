@@ -11,19 +11,12 @@ Programado por: António da Mata nº90022
 int main(int argc, char *argv[]){
 
   FILE *fOut = NULL;
-  Puzzles *Puzzle = NULL;
 
-  if (argc != 2) {
+  if (argc != 2 || strstr(argv[1],".cities")== NULL) {
     exit(0);
   }
-  Puzzle = readFile(argv[1]);
 
-  fOut = createFileSol(argv[1]);
-
-  mainOper(Puzzle, fOut);
-
-  freeAllPuzzle(Puzzle);
-  fclose(fOut);
+  readFile(argv[1]);
 
   return(0);
 }

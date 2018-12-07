@@ -1,10 +1,9 @@
 #include "file.h"
 
-Puzzles *readFile(char *nomef){
+void readFile(char *nomef){
 
-  FILE *fi = NULL;
-  Puzzles *AllPuzzle = NULL;
-  Puzzles *AuxPuzzle, *NewPuzzle = NULL;
+  FILE *fi = NULL, *fOut = NULL;
+  Puzzles *Puzzle = NULL;
   Pos *NewPos = NULL;
 
   int nCols, nLines, moves;
@@ -12,24 +11,27 @@ Puzzles *readFile(char *nomef){
   int i=0, j=0, p=0;
   int dumb;
 
+
   fi = fopen(nomef, "r");
 
   if(fi == NULL){
     exit(0);
   }
 
+  fOut = createFileSol(nomef);
+
   while(fscanf(fi, "%d %d %c %d", &nLines, &nCols, &mode, &moves)==4){
 
-    NewPuzzle = (Puzzles *)malloc(sizeof(Puzzles));
-    if(NewPuzzle == NULL){
+    Puzzle = (Puzzles *)malloc(sizeof(Puzzles));
+    if(Puzzle == NULL){
       exit(0);
     }
 
-    NewPuzzle->mode = mode;
-    NewPuzzle->nmoves = moves;
-    NewPuzzle->cols = nCols;
-    NewPuzzle->lines = nLines;
-    NewPuzzle->Positions = NULL;
+    Puzzle->mode = mode;
+    Puzzle->nmoves = moves;
+    Puzzle->cols = nCols;
+    Puzzle->lines = nLines;
+    Puzzle->Positions = NULL;
 
     for(i=0; i<moves; i++){
         NewPos=NULL;
@@ -41,30 +43,30 @@ Puzzles *readFile(char *nomef){
         p = fscanf(fi, "%d %d", &NewPos->line, &NewPos->col);
         if(p!=2)
           exit(0);
-        InsertListNode(&NewPuzzle->Positions, NewPos);
+        InsertListNode(&Puzzle->Positions, NewPos);
     }
 
     if(mode=='A'||mode=='B'||mode=='C'){
-      NewPuzzle->board = (int **)malloc(nLines*sizeof(int *));
-      if(NewPuzzle->board == NULL){
+      Puzzle->board = (int **)malloc(nLines*sizeof(int *));
+      if(Puzzle->board == NULL){
         exit(0);
       }
       for(i=0; i<nLines; i++){
-        NewPuzzle->board[i]=(int *)malloc(nCols*sizeof(int));
-        if(NewPuzzle->board[i] == NULL){
+        Puzzle->board[i]=(int *)malloc(nCols*sizeof(int));
+        if(Puzzle->board[i] == NULL){
           exit(0);
         }
       }
 
       for(i=0; i<nLines; i++){
         for(j=0; j<nCols; j++){
-        p = fscanf(fi, "%d", &NewPuzzle->board[i][j]);
+        p = fscanf(fi, "%d", &Puzzle->board[i][j]);
         if(p!=1)
           exit(0);
         }
       }
     }else{
-      NewPuzzle->board=NULL;
+      Puzzle->board=NULL;
       for(i=0; i<nLines; i++){
         for(j=0; j<nCols; j++){
         p = fscanf(fi, "%d", &dumb);
@@ -73,17 +75,12 @@ Puzzles *readFile(char *nomef){
         }
       }
     }
-    NewPuzzle -> nPuzzle = NULL;
-    if(AllPuzzle == NULL)
-      AllPuzzle = NewPuzzle;
-    else
-      AuxPuzzle->nPuzzle = NewPuzzle;
 
-    AuxPuzzle = NewPuzzle;
-
+    mainOper(Puzzle, fOut);
+    freeAllPuzzle(Puzzle);
   }
   fclose(fi);
-  return AllPuzzle;
+  fclose(fOut);
 }
 
 FILE *createFileSol(char *nomef){
