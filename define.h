@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INFINITY 999999
+#define INFINITY 30000
 #define lessPri(A, B) ((A) > (B))
 
 typedef struct node link;
@@ -17,7 +17,7 @@ typedef struct _lList lList;
 
 struct node {
   int v;
-  int weight;
+  short int weight;
 };
 
 struct _graph{
@@ -28,7 +28,7 @@ struct _graph{
 
 typedef struct _edge{
   int v;
-  int w;
+  short int w;
 }Edge;
 
 struct _lList{
@@ -38,16 +38,16 @@ struct _lList{
 
 struct _Puzzles{
   char mode;
-  int nmoves;
-  int lines;
-  int cols;
+  short int nmoves;
+  short int lines;
+  short int cols;
   lList *Positions;
-  int **board;
+  short int **board;
 };
 
 struct _Pos{
-  int line;
-  int col;
+  short int line;
+  short int col;
 };
 
 #include "oper.h"

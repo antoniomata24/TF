@@ -9,12 +9,13 @@
 
 */
 void mainOper(Puzzles *Data, FILE *f){
-  int * new_sol = NULL, *iniB =NULL, *fimB = NULL;
+  int * new_sol = NULL;
   lList **new_solB = NULL;
   lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL;
   Pos *SinglePos=NULL;
   Graph *NewG = NULL;
-  int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
+  int i=0, ini = 0, fim = 0, contador = 0, n=0;
+  short int custo=0, passos=0, x, y, inv=0;
   int tallocs=0;
   link *Auxlink = NULL;
   Edge *Ed1=NULL, *Ed2=NULL;
@@ -94,7 +95,7 @@ void mainOper(Puzzles *Data, FILE *f){
         AuxPos=AuxPos->next;
       }
     }
-    fprintf(f, "%d %d %c %d %d %d\n", Data->lines, Data->cols, Data->mode,
+    fprintf(f, "%hi %hi %c %hi %hi %hi\n", Data->lines, Data->cols, Data->mode,
                                       Data->nmoves , custo, passos);
     for(n=0; n<contador; n++){
       printPathList(new_solB[n], Data, f);
@@ -208,7 +209,7 @@ void swap(int **heap, int **posInH, int n1, int n2){
   auxH[n2]=i;
 }
 
-void Hinsert(int **Heap, int hsize, int *free, int n, int *price, int **posInH){
+void Hinsert(int **Heap, int hsize, int *free, int n, unsigned int *price, int **posInH){
   if((*free)<hsize){
     (*Heap)[*free]=n;
     (*posInH)[n]=*free;
@@ -217,7 +218,7 @@ void Hinsert(int **Heap, int hsize, int *free, int n, int *price, int **posInH){
   }
 }
 
-int HExtractMin(int **Heap, int hsize, int *price, int **posinH){
+int HExtractMin(int **Heap, int hsize, unsigned int *price, int **posinH){
   int n=0;
   n=*Heap[0];
   swap(Heap, posinH, 0, hsize-1);
@@ -225,7 +226,7 @@ int HExtractMin(int **Heap, int hsize, int *price, int **posinH){
   return n;
 }
 
-void FixDown(int **Heap, int Idx, int N, int *price, int **posinH) {
+void FixDown(int **Heap, int Idx, int N, unsigned int *price, int **posinH) {
     int Child;
     while(2*Idx < N-1) {
         Child = 2*Idx+1;
@@ -239,7 +240,7 @@ void FixDown(int **Heap, int Idx, int N, int *price, int **posinH) {
 
 }
 
-void FixUp(int **Heap, int Idx, int *price, int **posInH){
+void FixUp(int **Heap, int Idx, unsigned int *price, int **posInH){
   while (Idx > 0 && lessPri(price[(*Heap)[(Idx-1)/2]], price[(*Heap)[Idx]])){
     swap(Heap, posInH, Idx, (Idx-1)/2);
     Idx = (Idx-1)/2;
@@ -260,7 +261,7 @@ void FixUp(int **Heap, int Idx, int *price, int **posInH){
           position will contain -1)
 */
 int *searchPath(Graph *G, int source, int dest){
-  int *price = NULL;
+  unsigned int *price = NULL;
   int *prev = NULL;
   int *heap=NULL;
   int i=0, v=0, nfree=0, hsize=0;
@@ -278,7 +279,7 @@ int *searchPath(Graph *G, int source, int dest){
       exit(0);
   }
   int *posInH = (int *)malloc(G->V*sizeof(int));
-  price=(int *)malloc(G->V*sizeof(int));
+  price=(unsigned int *)malloc(G->V*sizeof(unsigned int));
   if(price == NULL)
     exit(0);
   for(i=0; i<G->V; i++){
