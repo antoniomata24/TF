@@ -177,7 +177,7 @@ void printSolutionsBSteps(FILE *f, int *sol, Puzzles *Puzzle,
 
 void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
   int custo=0, passos=0, x=0, y=0;
-  Edge *AuxE=NULL;
+  int *AuxE=NULL;
   lList *AuxL = Sol;
 
   if (Sol == NULL){
@@ -190,7 +190,7 @@ void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
 
   while(AuxL!=NULL){
     AuxE=AuxL->data;
-    invertConvertV(AuxE->v, Puzzle, &x, &y);
+    invertConvertV(AuxE[0], Puzzle, &x, &y);
     custo += Puzzle->board[x][y];
     passos++;
     AuxL=AuxL->next;

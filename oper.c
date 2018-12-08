@@ -170,17 +170,16 @@ int validateAllPoints(Puzzles *AuxP){
 */
 lList *convertAllPoints(Puzzles *AuxP){
 
-  Edge *AuxE = NULL;
+  int *AuxL = NULL;
   lList *lPoints= NULL, *PosList = NULL;
   Pos *AuxPos=NULL;
 
   PosList=AuxP->Positions;
   while (PosList!=NULL){
-    AuxE=(Edge *)malloc(sizeof(Edge));
+    AuxL=(int *)malloc(sizeof(int));
     AuxPos=PosList->data;
-    AuxE->v=convertV(AuxPos->line, AuxPos->col, AuxP);
-    AuxE->w=AuxP->board[AuxPos->line][AuxPos->col];
-    InsertListNode(&lPoints, AuxE);
+    AuxL[0]=convertV(AuxPos->line, AuxPos->col, AuxP);
+    InsertListNode(&lPoints, AuxL);
     PosList=PosList->next;
   }
   return lPoints;
@@ -247,14 +246,6 @@ void FixUp(int **Heap, int Idx, int *price, int **posInH){
   }
 }
 
-int searchInHeap(int *heap, int hsize, int n){
-  int i =0 ;
-  for(i=0;i<hsize;i++){
-    if(heap[i]==n)
-      return i;
-  }
-  return 0;
-}
 /** searchPath - runs Dijkstra algorithm to find the lowest cost path between 2
                 points
 
@@ -401,25 +392,24 @@ int **matrixInit(int cols, int lines, int n){
   \param n - absolute value of the path point to be inserted in the path list
 */
 void addPathPoint(lList **Path, int n){
-  Edge *New = NULL;
   lList *NewList = *Path;
-   New=(Edge *)malloc(sizeof(Edge));
-    New->v=n;
-    InsertListNode(&NewList, New);
+  int* data = (int*)malloc(sizeof(int));
+
+    data[0]=n;
+    InsertListNode(&NewList, data);
     *Path=NewList;
 }
 
 void addPathSol(int *prev, lList **Path, int source, int n){
 
   lList *AuxList=NULL;
-  Edge *New = NULL;
   lList *NewList = NULL;
 
   while(n!=source){
-    New=(Edge *)malloc(sizeof(Edge));
-      New->v=n;
+    int* data = (int*)malloc(sizeof(int));
+    data[0]=n;
     AuxList=(lList *)malloc(sizeof(lList));
-    AuxList->data=New;
+    AuxList->data=data;
     AuxList->next=NewList;
     NewList=AuxList;
     n=prev[n];

@@ -12,7 +12,6 @@ void Hinsert(int **, int, int *, int, int *, int **);
 int HExtractMin(int **, int , int *, int **);
 void FixDown(int **, int , int , int *, int **);
 void FixUp(int **, int, int*, int **);
-int searchInHeap(int *, int , int );
 int *searchPath(Graph *, int , int );
 void searchPathC(Graph *, lList **, lList **, Edge *);
 void addPathPoint(lList **, int );
