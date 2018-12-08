@@ -271,8 +271,7 @@ int *searchPath(Graph *G, int source, int dest){
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
   if(source==dest){
-    prev = (int*)calloc(1,sizeof(int));
-    return prev;
+    return NULL;
   } else{
     prev=(int *)malloc(G->V*sizeof(int));
     if(prev == NULL)
@@ -288,15 +287,12 @@ int *searchPath(Graph *G, int source, int dest){
     posInH[i]=-1;
   }
 
-  heap=IniHeap(G->V);
-  hsize=G->V;
+  heap=IniHeap((G->V)/2);
+  hsize=G->V/2;
   price[source]=0;
   v=source;
 
-
-  for(i=0; i<G->V; i++){
-    Hinsert(&heap, hsize, &nfree, i, price, &posInH);
-  }
+  FixDown(&heap, v, hsize, price, &posInH);
 
 
   while (hsize>0){
