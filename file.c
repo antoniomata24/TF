@@ -161,16 +161,8 @@ void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
 
 }
 
-void printSolutionsB(FILE *f, int *sol, Puzzles *Puzzle,
+void printSolutionsB(FILE *f, Puzzles *Puzzle,
                     int ini, int fim, int custo, int passos){
-
-  if (sol == NULL){
-    custo = -1;
-    passos = 0;
-    fprintf(f, "%d %d %c %d %d %d\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
-                                      Puzzle->nmoves , custo, passos);
-    return;
-  }
 
   fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
                                     Puzzle->nmoves , custo, passos);

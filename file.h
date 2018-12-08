@@ -5,7 +5,7 @@
 void readFile(char *);
 FILE *createFileSol(char *);
 void printSolutions(FILE *, int *, Puzzles *, int, int);
-void printSolutionsB(FILE *, int *, Puzzles *, int, int, int, int);
+void printSolutionsB(FILE *, Puzzles *, int, int, int, int);
 void printSolutionsBSteps(FILE *, int *, Puzzles *, int, int);
 void printSolutionsC(FILE *, lList *, Puzzles *);
 void printPathList(lList *, Puzzles *, FILE *);

@@ -14,6 +14,7 @@ typedef struct _Puzzles Puzzles;
 typedef struct _Pos Pos;
 typedef void * Item;
 typedef struct _lList lList;
+
 struct node {
   int v;
   int weight;

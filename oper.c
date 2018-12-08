@@ -9,56 +9,20 @@
 
 */
 void mainOper(Puzzles *Data, FILE *f){
-<<<<<<< HEAD
-  int * new_sol = NULL;
-  Puzzles *AuxP = NULL;
-  lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL, *auxPoint=NULL;
-=======
   int * new_sol = NULL, *iniB =NULL, *fimB = NULL;
-  int **new_solB = NULL;
+  lList **new_solB = NULL;
   lList *AllPoints = NULL, *new_solC=NULL, *AuxPos=NULL;
->>>>>>> origin/rafa
   Pos *SinglePos=NULL;
   Graph *NewG = NULL;
-  int ini = 0, fim = 0;
-  Edge *AuxEd=NULL, *AuxEd1 = NULL;
+  int i=0, ini = 0, fim = 0, contador = 0, n=0, custo=0, passos=0, x, y, inv=0;
+  int tallocs=0;
+  link *Auxlink = NULL;
+  Edge *Ed1=NULL, *Ed2=NULL;
 
-
-<<<<<<< HEAD
-  AuxP = Data;
-  if (AuxP == NULL) exit(0);
-
-  while (AuxP!=NULL){
-    AuxPos = AuxP->Positions;
-    /*Creates Graph to all the eligible points in the puzzle and their possible
-    moves*/
-    switch (AuxP->mode) {
-      case 'A':
-        if(AuxP->nmoves!=2){
-          printSolutions(f, NULL, AuxP, 0, 0);
-          break;
-        }
-        NewG = createGraph(AuxP);
-        /*converts initial and final points of the intended path*/
-        SinglePos=AuxPos->data;
-        ini=convertV(SinglePos->line, SinglePos->col, AuxP);
-        SinglePos=AuxPos->next->data;
-        fim=convertV(SinglePos->line, SinglePos->col, AuxP);
-
-        /*runs Dijkstra algorithm to search minimum cost path*/
-        new_sol=searchPath(NewG, ini, fim);
-        /*prints the solution in the exit file*/
-        printSolutions(f, new_sol, AuxP, ini, fim);
-        /*freeing of the memory used*/
-        freeGraph(NewG);
-        NewG=NULL;
-        free(new_sol);
-=======
   AuxPos = Data->Positions;
   /*Creates Graph to all the eligible points in the puzzle and their possible
   moves*/
   contador = 0;
->>>>>>> origin/rafa
 
   switch (Data->mode) {
     case 'A':
@@ -82,140 +46,69 @@ void mainOper(Puzzles *Data, FILE *f){
       NewG=NULL;
       free(new_sol);
 
-<<<<<<< HEAD
-      case 'B':
-
-        if(validateAllPoints(AuxP)==0 || AuxP->nmoves<2){
-            printSolutions(f, NULL, AuxP, 0, 0);
-            break;
-        }
-
-        NewG = createGraph(AuxP);
-        AllPoints=convertAllPoints(AuxP);
-        auxPoint=AllPoints;
-        while (auxPoint->next!=NULL) {
-          AuxEd=auxPoint->data;
-          AuxEd1=auxPoint->next->data;
-          new_sol=searchPath(NewG, AuxEd->v,AuxEd1->v);
-          if(new_sol==NULL){
-            printSolutions(f, NULL, AuxP, 0, 0);
-            free(NewG);
-            if(new_solC!=NULL){
-              freelList(new_solC);
-              new_solC=NULL;
-              break;
-            }
-          }
-          addPathSol(new_sol, &new_solC, AuxEd->v, AuxEd1->v);
-          auxPoint=auxPoint->next;
-          free(new_sol);
-          new_sol=NULL;
-        }
-        if(new_solC==NULL)
-            break;
-        printSolutionsC(f, new_solC, AuxP);
-        freelList(new_solC);
-        new_solC=NULL;
-        free(NewG);
-        break;
-=======
       break;
 
     case 'B':
 
-      NewG = createGraph(Data);
-      /*allocation for all the paths and all the initial and final points*/
-      new_solB = (int**)malloc((Data->nmoves)*sizeof(int*));
-      if (new_solB==NULL) exit(0);
-      iniB = (int*)malloc((Data->nmoves)*sizeof(int));
-      if (iniB==NULL) exit(0);
-      fimB = (int*)malloc((Data->nmoves)*sizeof(int));
-      if (fimB==NULL) exit(0);
-      /*reinitialize of the variables needed*/
-      contador=0;
-      custo=0;
-      passos=0;
-      inv=0;
-      tallocs=0;
+    if(validateAllPoints(Data)==0){
+       printSolutions(f, NULL, Data, 0, 0);
+       break;
+    }
+    contador=0;
+    NewG = createGraph(Data);
+    /*allocation for all the paths and all the initial and final points*/
+    new_solB = (lList**)malloc((Data->nmoves-1)*sizeof(lList*));
+    if (new_solB==NULL) exit(0);
+    for(n=0; n<Data->nmoves-1; n++)
+      new_solB[n]=NULL;
 
-      if(validateAllPoints(Data)==0){
-          printSolutions(f, NULL, Data, 0, 0);
-          inv=1;
+    AllPoints=convertAllPoints(Data);
+    AuxPos=AllPoints;
+    while(AuxPos->next!=NULL){
+      Ed1=AuxPos->data;
+      Ed2=AuxPos->next->data;
+      new_sol=searchPath(NewG, Ed1->v, Ed2->v);
+      if(new_sol==NULL){
+        printSolutions(f, NULL, Data, 0, 0);
+        free(new_sol);
+        freeGraph(NewG);
+        inv=1;
+        break;
       }
-      /*if there are no invalid paths, proceeds to print the solution*/
-      if(inv==0){
-        /*while there are still more paths to analyse*/
-        while (AuxPos->next!=NULL){
-          new_solB[contador]=NULL;
-          /*creating the path between the initial point and final point on the [contador] path*/
-          SinglePos=AuxPos->data;
-          iniB[contador]=convertV(SinglePos->line, SinglePos->col, Data);
-          SinglePos=AuxPos->next->data;
-          fimB[contador]=convertV(SinglePos->line, SinglePos->col, Data);
-          new_solB[contador]=searchPath(NewG, iniB[contador], fimB[contador]);
-          /*if there is no solution to that path*/
-          if(new_solB[contador]==NULL){
-            inv=1;
-            break;
-          }
-          /*iterate to the next path*/
-          AuxPos = AuxPos->next;
-          contador++;
-          tallocs++;
-        }
-
-      /*verify if there are any paths that are not valid, if there are print the invalid solution*/
-        if (inv==1){
-          printSolutions(f, NULL, Data, 0, 0);
-          /*freeing all the memory used*/
-          for (i=0; i<tallocs; i++){
-            free(new_solB[i]);
-          }
-          freeGraph(NewG);
-          NewG=NULL;
-          free(new_solB);
-          free(iniB);
-          free(fimB);
-          break;
-        }
-        /*iterate all the paths*/
-        for (contador = (Data->nmoves)-2; contador >= 0; contador--){
-          n = fimB[contador];
-          /*adding all the totals from the paths*/
-          while(n!=iniB[contador]){
-            /*convert the index (n) to coordinates from the matrix*/
-            invertConvertV(n, Data, &x, &y);
-            custo += Data->board[x][y];
-            passos++;
-            n = new_solB[contador][n];
-          }
-        }
-        /*prints the solution*/
-        for (contador=0; contador<Data->nmoves-1; contador++){
-          if (contador == 0){
-            /*prints the 1st line*/
-            printSolutionsB(f, new_solB[contador], Data, iniB[contador], fimB[contador], custo, passos);
-            /*prints 1st path*/
-            printSolutionsBSteps(f, new_solB[contador], Data, iniB[contador], fimB[contador]);
-          } else {
-            /*prints the rest of the paths*/
-            printSolutionsBSteps(f, new_solB[contador], Data, iniB[contador], fimB[contador]);
-          }
-        }
-        /*pritns the spacing between solutions*/
-        fprintf(f,"\n");
-      }
-      /*freeing all the memory used*/
-      for (i=0; i<tallocs; i++){
-        free(new_solB[i]);
-      }
-      freeGraph(NewG);
-      NewG=NULL;
-      free(new_solB);
-      free(iniB);
-      free(fimB);
+      addPathSol(new_sol, &(new_solB[contador]), Ed1->v, Ed2->v);
+      AuxPos=AuxPos->next;
+      contador++;
+      free(new_sol);
+      new_sol=NULL;
+    }
+    if(inv==1)
       break;
->>>>>>> origin/rafa
+
+    for(n=0; n<contador; n++){
+      AuxPos=new_solB[n];
+      while(AuxPos!=NULL){
+        Auxlink=AuxPos->data;
+        invertConvertV(Auxlink->v, Data, &x, &y);
+        custo+=Data->board[x][y];
+        passos++;
+        AuxPos=AuxPos->next;
+      }
+    }
+    fprintf(f, "%d %d %c %d %d %d\n", Data->lines, Data->cols, Data->mode,
+                                      Data->nmoves , custo, passos);
+    for(n=0; n<contador; n++){
+      printPathList(new_solB[n], Data, f);
+    }
+    fprintf(f, "\n");
+    /*freeing all the memory used*/
+    for (i=0; i<tallocs; i++){
+      freelList(new_solB[i]);
+    }
+    freeGraph(NewG);
+    NewG=NULL;
+    free(new_solB);
+    break;
+
 
     case 'C':
       /*reinitializing variables*/
@@ -286,6 +179,7 @@ lList *convertAllPoints(Puzzles *AuxP){
     AuxE=(Edge *)malloc(sizeof(Edge));
     AuxPos=PosList->data;
     AuxE->v=convertV(AuxPos->line, AuxPos->col, AuxP);
+    AuxE->w=AuxP->board[AuxPos->line][AuxPos->col];
     InsertListNode(&lPoints, AuxE);
     PosList=PosList->next;
   }
@@ -385,7 +279,7 @@ int *searchPath(Graph *G, int source, int dest){
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
   if(source==dest){
-    prev=NULL;
+    prev = (int*)calloc(1,sizeof(int));
     return prev;
   } else{
     prev=(int *)malloc(G->V*sizeof(int));
@@ -449,7 +343,6 @@ int *searchPath(Graph *G, int source, int dest){
       return prev;
     }
   }
-  free(posInH);
   free(heap);
   free(price);
   free(posInH);
@@ -512,19 +405,26 @@ void addPathPoint(lList **Path, int n){
   lList *NewList = *Path;
    New=(Edge *)malloc(sizeof(Edge));
     New->v=n;
-    New->w=0;
     InsertListNode(&NewList, New);
     *Path=NewList;
 }
 
 void addPathSol(int *prev, lList **Path, int source, int n){
 
-  if(n==source)
-    return;
+  lList *AuxList=NULL;
+  Edge *New = NULL;
+  lList *NewList = NULL;
 
-  addPathSol(prev, Path, source, prev[n]);
-  addPathPoint(Path, n);
-
+  while(n!=source){
+    New=(Edge *)malloc(sizeof(Edge));
+      New->v=n;
+    AuxList=(lList *)malloc(sizeof(lList));
+    AuxList->data=New;
+    AuxList->next=NewList;
+    NewList=AuxList;
+    n=prev[n];
+  }
+  *Path=NewList;
   return;
 }
 
