@@ -2,7 +2,7 @@
 #define file_h
 #include "define.h"
 
-Puzzles *readFile(char *);
+void readFile(char *);
 FILE *createFileSol(char *);
 void printSolutions(FILE *, int *, Puzzles *, int, int);
 void printSolutionsB(FILE *, int *, Puzzles *, int, int, int, int);

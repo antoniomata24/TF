@@ -57,7 +57,6 @@ void freeAllPuzzle(Puzzles *Data){
 
   int i = 0;
 
-  freeAllPuzzle(Data->nPuzzle);
   freelList(Data->Positions);
 
   if(Data->board!=NULL){
@@ -81,14 +80,5 @@ void freeGraph(Graph *Data){
     freelList(Data->adj[i]);
   }
   free(Data->adj);
-  free(Data);
-}
-
-void freePQ(PQueue **Data, Graph *G){
-  int i;
-
-  for(i=0; i<G->V; i++){
-    free(Data[i]);
-  }
   free(Data);
 }
