@@ -5,7 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+<<<<<<< HEAD
 #define INFINITY 5000
+=======
+#define INFINITY 30000
+>>>>>>> origin/rafa
 #define lessPri(A, B) ((A) > (B))
 
 typedef struct node link;
