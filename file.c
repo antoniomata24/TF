@@ -207,13 +207,13 @@ void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
 }
 
 void printPathList(lList *Sol, Puzzles *P, FILE *fOut){
-  Edge *AuxE = NULL;
+  int *AuxE = NULL;
   lList *AuxL = Sol;
   short int x=0, y=0;
 
   while(AuxL!=NULL){
     AuxE=AuxL->data;
-    invertConvertV(AuxE->v, P, &x, &y);
+    invertConvertV(AuxE[0], P, &x, &y);
     fprintf(fOut, "%hi %hi %hi\n", x, y, P->board[x][y]);
     AuxL=AuxL->next;
   }
