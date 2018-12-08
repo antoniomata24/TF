@@ -6,7 +6,7 @@ void readFile(char *nomef){
   Puzzles *Puzzle = NULL;
   Pos *NewPos = NULL;
 
-  int nCols, nLines, moves;
+  short int nCols, nLines, moves;
   char mode;
   int i=0, j=0, p=0, val=0;
   int dumb;
@@ -20,7 +20,7 @@ void readFile(char *nomef){
 
   fOut = createFileSol(nomef);
 
-  while(fscanf(fi, "%d %d %c %d", &nLines, &nCols, &mode, &moves)==4){
+  while(fscanf(fi, "%hi %hi %c %hi", &nLines, &nCols, &mode, &moves)==4){
 
     val=0;
 
@@ -65,19 +65,19 @@ void readFile(char *nomef){
             exit(0);
           }
 
-          p = fscanf(fi, "%d %d", &NewPos->line, &NewPos->col);
+          p = fscanf(fi, "%hi %hi", &NewPos->line, &NewPos->col);
           if(p!=2)
             exit(0);
           InsertListNode(&Puzzle->Positions, NewPos);
       }
 
       if(mode=='A'||mode=='B'||mode=='C'){
-        Puzzle->board = (int **)malloc(nLines*sizeof(int *));
+        Puzzle->board = (short int **)malloc(nLines*sizeof(short int *));
         if(Puzzle->board == NULL){
           exit(0);
         }
         for(i=0; i<nLines; i++){
-          Puzzle->board[i]=(int *)malloc(nCols*sizeof(int));
+          Puzzle->board[i]=(short int *)malloc(nCols*sizeof(short int));
           if(Puzzle->board[i] == NULL){
             exit(0);
           }
@@ -85,7 +85,7 @@ void readFile(char *nomef){
 
         for(i=0; i<nLines; i++){
           for(j=0; j<nCols; j++){
-          p = fscanf(fi, "%d", &Puzzle->board[i][j]);
+          p = fscanf(fi, "%hi", &Puzzle->board[i][j]);
           if(p!=1)
             exit(0);
           }
@@ -132,13 +132,14 @@ FILE *createFileSol(char *nomef){
 }
 
 void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
-  int custo=0, passos=0, x=0, y=0, n;
+  short int custo=0, passos=0, x=0, y=0;
+  int n;
 
   n=fim;
   if (sol == NULL){
     custo = -1;
     passos = 0;
-    fprintf(f, "%d %d %c %d %d %d\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+    fprintf(f, "%hi %hi %c %hi %hi %hi\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
                                       Puzzle->nmoves , custo, passos);
     return;
   }
@@ -152,7 +153,7 @@ void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
       }
   }
 
-  fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+  fprintf(f, "%hi %hi %c %hi %hi %hi\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
                                     Puzzle->nmoves , custo, passos);
 
   printreverse(sol, Puzzle, ini, fim, fim, f);
@@ -164,7 +165,7 @@ void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
 void printSolutionsB(FILE *f, Puzzles *Puzzle,
                     int ini, int fim, int custo, int passos){
 
-  fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+  fprintf(f, "%hi %hi %c %hi %hi %hi\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
                                     Puzzle->nmoves , custo, passos);
 }
 
@@ -176,27 +177,27 @@ void printSolutionsBSteps(FILE *f, int *sol, Puzzles *Puzzle,
 }
 
 void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
-  int custo=0, passos=0, x=0, y=0;
-  Edge *AuxE=NULL;
+  short int custo=0, passos=0, x=0, y=0;
+  int *AuxE=NULL;
   lList *AuxL = Sol;
 
   if (Sol == NULL){
     custo = -1;
     passos = 0;
-    fprintf(f, "%d %d %c %d %d %d\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+    fprintf(f, "%hi %hi %c %hi %hi %hi\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
                                       Puzzle->nmoves , custo, passos);
     return;
   }
 
   while(AuxL!=NULL){
     AuxE=AuxL->data;
-    invertConvertV(AuxE->v, Puzzle, &x, &y);
+    invertConvertV(AuxE[0], Puzzle, &x, &y);
     custo += Puzzle->board[x][y];
     passos++;
     AuxL=AuxL->next;
   }
 
-  fprintf(f, "%d %d %c %d %d %d\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
+  fprintf(f, "%hi %hi %c %hi %hi %hi\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
                                     Puzzle->nmoves , custo, passos);
 
   printPathList(Sol, Puzzle, f);
@@ -208,12 +209,12 @@ void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
 void printPathList(lList *Sol, Puzzles *P, FILE *fOut){
   Edge *AuxE = NULL;
   lList *AuxL = Sol;
-  int x=0, y=0;
+  short int x=0, y=0;
 
   while(AuxL!=NULL){
     AuxE=AuxL->data;
     invertConvertV(AuxE->v, P, &x, &y);
-    fprintf(fOut, "%d %d %d\n", x, y, P->board[x][y]);
+    fprintf(fOut, "%hi %hi %hi\n", x, y, P->board[x][y]);
     AuxL=AuxL->next;
   }
 
@@ -223,9 +224,9 @@ void printreverse(int *sol, Puzzles *Puzzle, int ini, int fim, int n, FILE *f){
   if (n!=ini){
     printreverse(sol, Puzzle, ini, fim, sol[n], f);
 
-    int x=0, y=0;
+    short int x=0, y=0;
 
     invertConvertV(n, Puzzle, &x, &y);
-    fprintf(f, "%d %d %d\n", x, y, Puzzle->board[x][y]);
+    fprintf(f, "%hi %hi %hi\n", x, y, Puzzle->board[x][y]);
   }
 }

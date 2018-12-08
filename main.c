@@ -10,8 +10,6 @@ Programado por: António da Mata nº90022
 
 int main(int argc, char *argv[]){
 
-  FILE *fOut = NULL;
-
   if (argc != 2 || strstr(argv[1],".cities")== NULL) {
     exit(0);
   }
