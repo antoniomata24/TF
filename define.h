@@ -10,13 +10,10 @@
 
 typedef struct node link;
 typedef struct _graph Graph;
-typedef struct _mraph MGraph;
 typedef struct _Puzzles Puzzles;
 typedef struct _Pos Pos;
 typedef void * Item;
 typedef struct _lList lList;
-typedef struct _PQueue PQueue;
-
 struct node {
   int v;
   int weight;
@@ -26,12 +23,6 @@ struct _graph{
   int V;
   int E;
   lList **adj;
-};
-
-struct _mgraph{
-  int V;
-  int E;
-  int **adj;
 };
 
 typedef struct _edge{

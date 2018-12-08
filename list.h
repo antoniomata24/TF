@@ -7,6 +7,5 @@ void freeNode(Item , lList **);
 void freelList(lList *);
 void freeAllPuzzle(Puzzles *);
 void freeGraph(Graph *);
-void freePQ(PQueue **, Graph *);
 
 #endif

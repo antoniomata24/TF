@@ -24,7 +24,7 @@ void mainOper(Puzzles *Data, FILE *f){
 
   switch (Data->mode) {
     case 'A':
-      if(Data->nmoves!=2 || validateAllPoints(Data)==0){
+      if(validateAllPoints(Data)==0){
         printSolutions(f, NULL, Data, 0, 0);
         break;
       }
@@ -63,7 +63,7 @@ void mainOper(Puzzles *Data, FILE *f){
       inv=0;
       tallocs=0;
 
-      if(Data->nmoves<2 || validateAllPoints(Data)==0){
+      if(validateAllPoints(Data)==0){
           printSolutions(f, NULL, Data, 0, 0);
           inv=1;
       }
@@ -146,7 +146,7 @@ void mainOper(Puzzles *Data, FILE *f){
       AllPoints=NULL;
       new_solC=NULL;
       /*if there are invalid points in the moves prints the invalid solution*/
-      if(validateAllPoints(Data)==0 || Data->nmoves<2){
+      if(validateAllPoints(Data)==0){
           printSolutions(f, NULL, Data, 0, 0);
           freeGraph(NewG);
           NewG=NULL;

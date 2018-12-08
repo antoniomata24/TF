@@ -8,7 +8,7 @@ void readFile(char *nomef){
 
   int nCols, nLines, moves;
   char mode;
-  int i=0, j=0, p=0;
+  int i=0, j=0, p=0, val=0;
   int dumb;
 
 
@@ -22,6 +22,8 @@ void readFile(char *nomef){
 
   while(fscanf(fi, "%d %d %c %d", &nLines, &nCols, &mode, &moves)==4){
 
+    val=0;
+
     Puzzle = (Puzzles *)malloc(sizeof(Puzzles));
     if(Puzzle == NULL){
       exit(0);
@@ -33,39 +35,17 @@ void readFile(char *nomef){
     Puzzle->lines = nLines;
     Puzzle->Positions = NULL;
 
-    for(i=0; i<moves; i++){
-        NewPos=NULL;
-        NewPos=(Pos *)malloc(sizeof(Pos));
-        if(NewPos == NULL){
-          exit(0);
-        }
+    if((Puzzle->mode== 'A' && Puzzle->nmoves!=2)||
+       (Puzzle->mode== 'B' && Puzzle->nmoves<2)||
+       (Puzzle->mode== 'C' && Puzzle->nmoves<2)){
 
-        p = fscanf(fi, "%d %d", &NewPos->line, &NewPos->col);
-        if(p!=2)
-          exit(0);
-        InsertListNode(&Puzzle->Positions, NewPos);
-    }
-
-    if(mode=='A'||mode=='B'||mode=='C'){
-      Puzzle->board = (int **)malloc(nLines*sizeof(int *));
-      if(Puzzle->board == NULL){
-        exit(0);
+      printSolutions(fOut, NULL, Puzzle, 0, 0);
+      val=1;
+      for(i=0; i<moves; i++){
+          p = fscanf(fi, "%d %d", &dumb, &dumb);
+          if(p!=2)
+            exit(0);
       }
-      for(i=0; i<nLines; i++){
-        Puzzle->board[i]=(int *)malloc(nCols*sizeof(int));
-        if(Puzzle->board[i] == NULL){
-          exit(0);
-        }
-      }
-
-      for(i=0; i<nLines; i++){
-        for(j=0; j<nCols; j++){
-        p = fscanf(fi, "%d", &Puzzle->board[i][j]);
-        if(p!=1)
-          exit(0);
-        }
-      }
-    }else{
       Puzzle->board=NULL;
       for(i=0; i<nLines; i++){
         for(j=0; j<nCols; j++){
@@ -74,10 +54,56 @@ void readFile(char *nomef){
           exit(0);
         }
       }
+      free(Puzzle);
     }
 
-    mainOper(Puzzle, fOut);
-    freeAllPuzzle(Puzzle);
+    if(val==0){
+      for(i=0; i<moves; i++){
+          NewPos=NULL;
+          NewPos=(Pos *)malloc(sizeof(Pos));
+          if(NewPos == NULL){
+            exit(0);
+          }
+
+          p = fscanf(fi, "%d %d", &NewPos->line, &NewPos->col);
+          if(p!=2)
+            exit(0);
+          InsertListNode(&Puzzle->Positions, NewPos);
+      }
+
+      if(mode=='A'||mode=='B'||mode=='C'){
+        Puzzle->board = (int **)malloc(nLines*sizeof(int *));
+        if(Puzzle->board == NULL){
+          exit(0);
+        }
+        for(i=0; i<nLines; i++){
+          Puzzle->board[i]=(int *)malloc(nCols*sizeof(int));
+          if(Puzzle->board[i] == NULL){
+            exit(0);
+          }
+        }
+
+        for(i=0; i<nLines; i++){
+          for(j=0; j<nCols; j++){
+          p = fscanf(fi, "%d", &Puzzle->board[i][j]);
+          if(p!=1)
+            exit(0);
+          }
+        }
+      }else{
+        Puzzle->board=NULL;
+        for(i=0; i<nLines; i++){
+          for(j=0; j<nCols; j++){
+          p = fscanf(fi, "%d", &dumb);
+          if(p!=1)
+            exit(0);
+          }
+        }
+      }
+
+      mainOper(Puzzle, fOut);
+      freeAllPuzzle(Puzzle);
+    }
   }
   fclose(fi);
   fclose(fOut);
