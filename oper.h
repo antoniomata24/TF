@@ -9,7 +9,7 @@ lList *convertAllPoints(Puzzles *);
 int *IniHeap(int );
 void swap(int **, int **, int , int);
 void Hinsert(int **, int, int *, int, unsigned int *, int **);
-int HExtractMin(int **, int , unsigned int *, int **);
+int HExtractMin(int **, int , unsigned int *, int **, int *);
 void FixDown(int **, int , int , unsigned int *, int **);
 void FixUp(int **, int, unsigned int*, int **);
 int *searchPath(Graph *, int , int );

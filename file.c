@@ -213,11 +213,7 @@ void printPathList(lList *Sol, Puzzles *P, FILE *fOut){
 
   while(AuxL!=NULL){
     AuxE=AuxL->data;
-<<<<<<< HEAD
-    invertConvertV(AuxE->v, P, &x, &y);
-=======
     invertConvertV(AuxE[0], P, &x, &y);
->>>>>>> origin/rafa
     fprintf(fOut, "%hi %hi %hi\n", x, y, P->board[x][y]);
     AuxL=AuxL->next;
   }

@@ -215,14 +215,32 @@ void Hinsert(int **Heap, int hsize, int *free, int n, unsigned int *price, int *
     (*posInH)[n]=*free;
     FixUp(Heap, *free, price, posInH);
     (*free)++;
+  }else{
+    (*Heap)[hsize]=n;
+    (*posInH)[n]=hsize;
+    FixUp(Heap, hsize, price, posInH);
   }
 }
 
-int HExtractMin(int **Heap, int hsize, unsigned int *price, int **posinH){
+int HExtractMin(int **Heap, int hsize, unsigned int *price, int **posinH, int *freeH){
   int n=0;
   n=*Heap[0];
-  swap(Heap, posinH, 0, hsize-1);
-  FixDown(Heap, 0, hsize-1, price, posinH);
+  if(*freeH<hsize){
+    int j=0;
+      int *auxH = *Heap;
+      j=auxH[0];
+      auxH[hsize-1]=j;
+      (*posinH)[j]=hsize-1;
+
+      j=auxH[(*freeH)-1];
+      (*posinH)[j]=0;
+      auxH[0]=j;
+      (*freeH)--;
+    FixDown(Heap, 0, (*freeH)-1, price, posinH);
+  }else{
+    swap(Heap, posinH, 0, hsize-1);
+    FixDown(Heap, 0, hsize-1, price, posinH);
+  }
   return n;
 }
 
@@ -271,7 +289,8 @@ int *searchPath(Graph *G, int source, int dest){
   if(G->adj[source]==NULL || G->adj[dest]==NULL) return NULL;
 
   if(source==dest){
-    return NULL;
+    prev = (int*)calloc(1,sizeof(int));
+    return prev;
   } else{
     prev=(int *)malloc(G->V*sizeof(int));
     if(prev == NULL)
@@ -287,17 +306,16 @@ int *searchPath(Graph *G, int source, int dest){
     posInH[i]=-1;
   }
 
-  heap=IniHeap((G->V)/2);
+  heap=IniHeap(G->V/2);
   hsize=G->V/2;
   price[source]=0;
   v=source;
 
-  FixDown(&heap, v, hsize, price, &posInH);
-
+  Hinsert(&heap, hsize, &nfree, v, price, &posInH);
 
   while (hsize>0){
 
-    v=HExtractMin(&heap, hsize, price, &posInH);
+    v=HExtractMin(&heap, hsize, price, &posInH, &nfree);
     hsize--;
     laux=G->adj[v];
     if (laux==NULL){
@@ -309,18 +327,31 @@ int *searchPath(Graph *G, int source, int dest){
       aux=laux->data;
       if(price[aux->v]>aux->weight+price[v]){
         price[aux->v]=aux->weight+price[v];
-        i=posInH[aux->v];
-        if(price[heap[i]]<price[heap[(i-1)/2]])
-          FixUp(&heap, i, price, &posInH);
-        if((2*i)+1<hsize)
-            if(price[heap[i]]>price[heap[(2*i)+1]])
-                FixDown(&heap, i, hsize, price, &posInH);
-        if(2*(i+1)<hsize)
-            if(price[heap[i]]>price[heap[2*(i+1)]])
-              FixDown(&heap, i, hsize, price, &posInH);
-        prev[aux->v]=v;
+        if(posInH[aux->v]==-1){
+          Hinsert(&heap, hsize, &nfree, aux->v, price, &posInH);
+        }else{
+          i=posInH[aux->v];
+          if(price[heap[i]]<price[heap[(i-1)/2]])
+            FixUp(&heap, i, price, &posInH);
+          if((2*i)+1<nfree){
+              if(price[heap[i]]>price[heap[(2*i)+1]]){
+                if(nfree<hsize)
+                  FixDown(&heap, i, nfree, price, &posInH);
+                else
+                  FixDown(&heap, i, hsize, price, &posInH);
+              }
+          }
+          if(2*(i+1)<nfree){
+              if(price[heap[i]]>price[heap[2*(i+1)]]){
+                if(nfree<hsize)
+                  FixDown(&heap, i, nfree, price, &posInH);
+                else
+                  FixDown(&heap, i, hsize, price, &posInH);
+             }
+          }
+          prev[aux->v]=v;
       }
-
+    }
       laux=laux->next;
     }
 
