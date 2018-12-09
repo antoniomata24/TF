@@ -68,17 +68,3 @@ void freeAllPuzzle(Puzzles *Data){
 
   free(Data);
 }
-
-void freeGraph(Graph *Data){
-
-  int i=0;
-
-  if(Data==NULL)
-    return;
-
-  for(i=0;i<Data->V;i++){
-    freelList(Data->adj[i]);
-  }
-  free(Data->adj);
-  free(Data);
-}
