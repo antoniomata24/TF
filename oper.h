@@ -13,6 +13,7 @@ int HExtractMin(int **, unsigned int *, int **, int *);
 void FixDown(int **, int , int , unsigned int *, int **);
 void FixUp(int **, int, unsigned int*, int **);
 int *searchPath(Puzzles *, int , int );
+void searchPathC(Puzzles *, int, int *, lList **);
 void addPathPoint(lList **, int );
 void addPathSol(int *, lList **,int , int );
 int searchMin(int , int *, int *);
