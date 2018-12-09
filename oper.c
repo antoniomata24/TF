@@ -126,7 +126,8 @@ void mainOper(Puzzles *Data, FILE *f){
 int validateAllPoints(Puzzles *AuxP){
 
     lList *PosList=AuxP->Positions;
-    Pos *AuxPos=NULL;;
+    Pos *AuxPos=NULL;
+    lList *AuxList = NULL;
     while(PosList!=NULL){
         AuxPos=PosList->data;
         if(AuxPos->col>=AuxP->cols||AuxPos->line>=AuxP->lines||AuxPos->line<0||AuxPos->col<0)
@@ -134,6 +135,11 @@ int validateAllPoints(Puzzles *AuxP){
         if(AuxP->board[AuxPos->line][AuxPos->col]==0)
             return 0;
         PosList=PosList->next;
+        AuxList=findAdj(AuxP, convertV(AuxPos->line, AuxPos->col, AuxP));
+        if(AuxList==NULL)
+          return 0;
+        freelList(AuxList);
+        AuxList=NULL;
     }
     return 1;
 }
