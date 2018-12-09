@@ -196,7 +196,7 @@ int HExtractMin(int **Heap, unsigned int *price, int **posinH, int *nfree){
     return -1;
 
   n=*Heap[0];
-  (*posinH)[(*Heap)[0]]=INFINITY;
+  (*posinH)[(*Heap)[0]]=-2;
 
   (*Heap)[0]=(*Heap)[(*nfree)-1];
   (*posinH)[(*Heap)[0]]=0;
@@ -313,7 +313,7 @@ int *searchPath(Puzzles *P, int source, int dest){
           Hinsert(&heap, &nfree, aux->v, price, &posInH);
         }else{
           i=posInH[aux->v];
-          if(i!=INFINITY)
+          if(i!=-2)
             if(price[heap[i]]<price[heap[(i-1)/2]])
               FixUp(&heap, i, price, &posInH);
         }
