@@ -5,11 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define INFINITY 30000
+#define INFINITY 5000
 #define lessPri(A, B) ((A) > (B))
 
 typedef struct node link;
-typedef struct _graph Graph;
 typedef struct _Puzzles Puzzles;
 typedef struct _Pos Pos;
 typedef void * Item;
@@ -18,12 +17,6 @@ typedef struct _lList lList;
 struct node {
   int v;
   short int weight;
-};
-
-struct _graph{
-  int V;
-  int E;
-  lList **adj;
 };
 
 typedef struct _edge{
