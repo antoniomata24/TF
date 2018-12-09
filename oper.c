@@ -300,8 +300,10 @@ int *searchPath(Puzzles *P, int source, int dest){
     AllAdj=findAdj(P, v);
 
     laux=AllAdj;
-    if(laux!=NULL)
-      aux=laux->data;
+    if(laux==NULL)
+      break;
+
+    aux=laux->data;
 
     while(laux!=NULL){
       aux=laux->data;
@@ -311,8 +313,9 @@ int *searchPath(Puzzles *P, int source, int dest){
           Hinsert(&heap, &nfree, aux->v, price, &posInH);
         }else{
           i=posInH[aux->v];
-          if(price[heap[i]]<price[heap[(i-1)/2]])
-            FixUp(&heap, i, price, &posInH);
+          if(i!=INFINITY)
+            if(price[heap[i]]<price[heap[(i-1)/2]])
+              FixUp(&heap, i, price, &posInH);
         }
         prev[aux->v]=v;
       }
