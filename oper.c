@@ -224,17 +224,11 @@ void Hinsert(int **Heap, int hsize, int *free, int n, unsigned int *price, int *
 
 int HExtractMin(int **Heap, int hsize, unsigned int *price, int **posinH, int *freeH){
   int n=0;
+  int j=0;
+  int *auxH = *Heap;
   n=*Heap[0];
   if(*freeH<hsize){
-    int j=0;
-      int *auxH = *Heap;
-      j=auxH[0];
-      auxH[hsize-1]=j;
-      (*posinH)[j]=hsize-1;
-
-      j=auxH[(*freeH)-1];
-      (*posinH)[j]=0;
-      auxH[0]=j;
+    swap(Heap, posinH, 0, hsize-1);
       (*freeH)--;
     FixDown(Heap, 0, (*freeH)-1, price, posinH);
   }else{
@@ -311,7 +305,8 @@ int *searchPath(Graph *G, int source, int dest){
   price[source]=0;
   v=source;
 
-  Hinsert(&heap, hsize, &nfree, v, price, &posInH);
+  for (i=0; i<G->V/2; i++)
+    Hinsert(&heap, hsize, &nfree, v, price, &posInH);
 
   while (hsize>0){
 

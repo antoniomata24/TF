@@ -17,7 +17,7 @@ tuktuk: $(OBJECTS)
 	$(CC) -O3 -o $@ $(OBJECTS)
 
 main.o: define.h main.c
-	$(CC) -O3 -c main.c
+	$(CC) -O3 -c main.cz
 file.o: file.h file.c
 	$(CC) -O3 -c file.c
 list.o : list.h list.c
