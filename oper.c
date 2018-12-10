@@ -128,7 +128,9 @@ void mainOper(Puzzles *Data, FILE *f){
         i++;
         AuxPosC=AuxPosC->next;
       }
-      searchPathC(Data, iniC, fimC, new_solC);
+
+      new_solC = searchPathC(Data, iniC, fimC);
+
       if(new_solC==NULL){
         printSolutions(f, NULL, Data, 0, 0);
         free(new_sol);
@@ -138,7 +140,7 @@ void mainOper(Puzzles *Data, FILE *f){
 
       for(n=0; n<(Data->nmoves-1); n++){
         AuxPosC=new_solC[n];
-        while(AuxPosC!=NULL){
+        while(AuxPosC->data!=NULL){
           AuxC=AuxPosC->data;
           invertConvertV(AuxC->v, Data, &x, &y);
           custo+=Data->board[x][y];
@@ -402,54 +404,122 @@ int *searchPath(Puzzles *P, int source, int dest){
   return prev;
 }
 
-void searchPathC(Puzzles *P, int source, int *dest, lList **new_solC){
-  int *new_sol1= NULL, *new_sol2= NULL;
-  int i=0, j=0, n=0, total=0, min = INFINITY, contador=0, ini=0, fim=0;
+lList **searchPathC(Puzzles *P, int source, int *dest){
+  lList **new_sol1= NULL, **new_sol2= NULL;
+  int i=0, n=0, total=0, min = INFINITY, contador=0, ini=0, fim=0;
   short int x=0, y=0;
 
-  ini=source;
+  new_sol1=(lList**)malloc(sizeof(lList*)*(P->nmoves-1));
+  new_sol2=(lList**)malloc(sizeof(lList*)*(P->nmoves-1));
 
-  while (dest!=NULL){
+  for(i=0; i<(P->nmoves-1);i++)
+    new_sol2[i]=NULL;
+
+  while(contador<(P->nmoves-1)){
+    total=0;
+    searchAllPath(P, source, dest, contador, &total, new_sol1);
+
+    if(total<min){
+      for(i=0; i<(P->nmoves-1);i++)
+        freelList(new_sol2[i]);
+      new_sol2=new_sol1;
+      min=total;
+    } else {
+      for(i=0; i<(P->nmoves-1);i++)
+        freelList(new_sol1[i]);
+      free(new_sol1);
+    }
+    contador++;
+  }
+
+  return new_sol2;
+}
+
+
+
+
+void searchAllPath(Puzzles *P, int source, int *dest, int fimIn, int *totalIn, lList **new_sol){
+  int *new_sol1= NULL, *new_sol2= NULL, *total=NULL, *auxdest=NULL;
+  int i=0, j=0, n=0, min = INFINITY, contador=0, ini=0, fim=0;
+  short int x=0, y=0;/*
+  lList **new_sol=NULL;*/
+
+  ini=source;
+  total=(int*)malloc(sizeof(int)*(P->nmoves-1));
+  auxdest=(int*)malloc(sizeof(int)*(P->nmoves-1));
+  for (i=0; i<(P->nmoves-1);i++)
+    auxdest[i]=dest[i];
+
+  new_sol1=searchPath(P, ini, auxdest[fimIn]);
+  total[n]=0;
+  j=auxdest[fimIn];
+  while(j!=ini){
+    invertConvertV(j, P, &x, &y);
+    total[n] += P->board[x][y];
+    j=new_sol1[j];
+  }
+
+  fim=auxdest[fimIn];
+
+  addPathSol(new_sol1, &(new_sol[n++]), ini, fim);
+
+  ini=auxdest[fimIn];
+
+  if (fim==auxdest[(P->nmoves-2)] && (P->nmoves-1)>1){
+    auxdest[(P->nmoves-2)]=INFINITY;
+  }
+  if (fim!=auxdest[(P->nmoves-2)] && (P->nmoves-1)>1){
+    auxdest[fimIn]=auxdest[(P->nmoves-2)];
+    auxdest[(P->nmoves-2)]=INFINITY;
+  }
+  if(auxdest[(P->nmoves-2)]==fim && (P->nmoves-1)==1){
+    free(auxdest);
+    auxdest=NULL;
+  }
+
+  while (auxdest!=NULL){
 
     min=INFINITY;
-    total=0;
+    total[n]=0;
     contador=0;
     while(contador<((P->nmoves-1)-n)){
-      total=0;
-      j=dest[contador];
-      new_sol1=searchPath(P, ini, dest[contador]);
+      total[n]=0;
+      j=auxdest[contador];
+      new_sol1=searchPath(P, ini, auxdest[contador]);
       while(j!=ini){
         invertConvertV(j, P, &x, &y);
-        total += P->board[x][y];
+        total[n] += P->board[x][y];
         j=new_sol1[j];
         }
-      if(total<min){
-        min=total;
+      if(total[n]<min){
+        min=total[n];
         i=contador;
         new_sol2=new_sol1;
-        fim=dest[i];
+        fim=auxdest[i];
       } else {
         free(new_sol1);
       }
       contador++;
     }
-    addPathSol(new_sol2, &(new_solC[n]), ini, fim);
+    addPathSol(new_sol2, &(new_sol[n]), ini, fim);
 
-    ini=dest[i];
+    ini=auxdest[i];
 
-    if (fim==dest[contador-1] && contador>1){
-      dest[n]=INFINITY;
+    if (fim==auxdest[contador-1] && contador>1){
+      auxdest[n]=INFINITY;
     }
-    if (fim!=dest[contador-1] && contador>1){
-      dest[i]=dest[contador-1];
-      dest[contador-1]=INFINITY;
+    if (fim!=auxdest[contador-1] && contador>1){
+      auxdest[i]=auxdest[contador-1];
+      auxdest[contador-1]=INFINITY;
     }
-    if(dest[contador-1]==fim && contador==1){
-      free(dest);
-      dest=NULL;
+    if(auxdest[contador-1]==fim && contador==1){
+      free(auxdest);
+      auxdest=NULL;
     }
     n++;
   }
+  for (i=0; i<(P->nmoves-1);i++)
+    *totalIn+=total[i];
 }
 
 /* addPathPoint - add a single point to the Path list computed by the "searchPathC"
