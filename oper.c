@@ -18,7 +18,7 @@ void mainOper(Puzzles *Data, FILE *f){
   int tallocs=0;
   link *Auxlink = NULL;
   link *Ed1=NULL, *Ed2=NULL;
-  int iniC = NULL, *fimC=NULL, totalC=0, *order=NULL, min=INFINITY;
+  int iniC = NULL, *fimC=NULL, totalC=0, *order=NULL, *orderfim=NULL, min=INFINITY;
   link *AuxC=NULL;
   int **matrix=NULL;
 
@@ -158,6 +158,7 @@ void mainOper(Puzzles *Data, FILE *f){
         if(inv==1) break;
       }
       permute(order, 0, Data->nmoves, matrix, Data, &min, orderfim);
+      printf("min: %d\n\n", min);
 
       if ( inv == 1){
         printSolutions(f, NULL, Data, 0, 0);
@@ -167,6 +168,9 @@ void mainOper(Puzzles *Data, FILE *f){
             printf("Matrix[%d][%d]: %d\n", n, j, matrix[n][j]);
           }
         }
+      }
+      for (n=0; n<(Data->nmoves); n++){
+        printf("final[%d] : %d\n", n, orderfim[n]);
       }
       /*
       permute(fimC, 0, (Data->nmoves-1), matrix);
@@ -208,6 +212,8 @@ void mainOper(Puzzles *Data, FILE *f){
       printSolutions(f, NULL, Data, 0, 0);
       break;
   }
+
+}
 
 
 lList *findAdj (Puzzles *Data, int n){
@@ -286,7 +292,6 @@ void invertConvertV(int n, Puzzles *Data, short int *x, short int *y){
   (*y)=n-(*x)*Data->cols;
 }
 
-}
 /** validateAllPoints - checks if all path points inserted in the entry file are
                         valid (within board margin and contains a value diferent
                         than 0)
@@ -457,13 +462,21 @@ int *searchPath(Puzzles *P, int source, int dest){
 }
 
 
-void permute(int *v, int start, int n, int** matrix, Puzzles *P, int *fimC, int*final)
+void permute(int *v, int start, int n, int** matrix, Puzzles *P, int *min, int*final)
 {
   int i, a=0, b=0, total=0;
   if (start == n-1) {
-    for (a=0; a<(P->nmoves);a++){
-      if (v[a]<v[a+1] && a)
-      total+=matrix()
+    for (a=0; a<(P->nmoves-1);a++){
+      if (v[a]<v[a+1])
+        total+=matrix[v[a+1]][v[a]];
+      if (v[a]>v[a+1])
+        total+=matrix[v[a]][v[a+1]];
+    }
+    if (total<(*min)){
+      (*min)=total;
+      for (a=0; a<(P->nmoves);a++){
+        final[a]=v[a];
+      }
     }
   }
   else {
@@ -472,7 +485,7 @@ void permute(int *v, int start, int n, int** matrix, Puzzles *P, int *fimC, int*
 
       v[i] = v[start];
       v[start] = tmp;
-      permute(v, start+1, n, matrix, P, fimC);
+      permute(v, start+1, n, matrix, P, &(*min), final);
       v[start] = v[i];
       v[i] = tmp;
     }

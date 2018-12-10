@@ -38,9 +38,9 @@ struct _Pos{
   short int col;
 };
 
-#include "oper.h"
-#include "heap.h"
 #include "file.h"
+#include "heap.h"
 #include "list.h"
+#include "oper.h"
 
 #endif

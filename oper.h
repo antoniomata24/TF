@@ -14,7 +14,7 @@ int *searchPath(Puzzles *, int , int );
 int searchPathC(Puzzles *, int, int );
 void searchAllPath(Puzzles *, int , int *, int , int*, lList**);
 
-int *permute(int *, int , int , int ** , Puzzles *, int *, int*);
+void permute(int *, int , int , int ** , Puzzles *, int *, int*);
 
 
 
