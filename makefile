@@ -6,10 +6,10 @@ CC = gcc
 CFLAGS = -Wall -ansi -std=c99 -O3
 
 #  Sources
-SOURCES =  main.c file.c list.c grafs.c oper.c
+SOURCES =  main.c file.c list.c heap.c oper.c
 
 #  Objects
-OBJECTS = main.o file.o list.o grafs.o oper.o
+OBJECTS = main.o file.o list.o heap.o oper.o
 
 %.o: %.c
 
@@ -25,8 +25,8 @@ list.o : list.h list.c
 oper.o : oper.h oper.c
 	$(CC) -O3 -c oper.c
 
-grafs.o : grafs.h grafs.c
-	$(CC) -O3 -c grafs.c
+heap.o : heap.h heap.c
+	$(CC) -O3 -c heap.c
 
 clean::
 	rm -f *.o *.walks core a.out tuktuk *~

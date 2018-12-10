@@ -4,22 +4,18 @@
 #include "define.h"
 
 void mainOper(Puzzles *, FILE *);
+lList *findAdj (Puzzles *, int );
+int ValidateMoveA(short int , short int, short int , short int, Puzzles *);
+int convertV(short int , short int ,Puzzles *);
+void invertConvertV(int , Puzzles *, short int *, short int *);
 int validateAllPoints(Puzzles *);
 lList *convertAllPoints(Puzzles *);
-int *IniHeap(int );
-void swap(int **, int **, int , int);
-void Hinsert(int ** , int *, int, unsigned int *, int **);
-int HExtractMin(int **, unsigned int *, int **, int *);
-void FixDown(int **, int , int , unsigned int *, int **);
-void FixUp(int **, int, unsigned int*, int **);
 int *searchPath(Puzzles *, int , int );
-lList **searchPathC(Puzzles *, int, int *);
+int searchPathC(Puzzles *, int, int );
 void searchAllPath(Puzzles *, int , int *, int , int*, lList**);
-void addPathPoint(lList **, int );
-void addPathSol(int *, lList **,int , int );
-int searchMin(int , int *, int *);
-int vEmpty(int *, int );
-int **matrixInit(int , int , int );
+
+int *permute(int *, int , int , int ** , Puzzles *, int *, int*);
+
 
 
 #endif

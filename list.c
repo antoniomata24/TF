@@ -1,5 +1,12 @@
 #include "list.h"
 
+void NEW(int v, lList **next, short int weight){
+  link *x = (link *) malloc(sizeof(struct node));
+  x->weight=weight;
+  x->v = v;
+  InsertListNode(next, x);
+}
+
 void InsertListNode(lList **ListIn ,Item DataIn){
   lList *New=NULL;
   lList *Aux=*ListIn;
@@ -67,4 +74,38 @@ void freeAllPuzzle(Puzzles *Data){
   }
 
   free(Data);
+}
+
+/* addPathPoint - add a single point to the Path list computed by the "searchPathC"
+                fuction
+
+  \param Path - linked list with link structs that contain all path points where
+                a single path point will be inserted (at the end of the list)
+  \param n - absolute value of the path point to be inserted in the path list
+*/
+void addPathPoint(lList **Path, int n){
+  lList *NewList = *Path;
+  int* data = (int*)malloc(sizeof(int));
+
+    data[0]=n;
+    InsertListNode(&NewList, data);
+    *Path=NewList;
+}
+
+void addPathSol(int *prev, lList **Path, int source, int n){
+
+  lList *AuxList=NULL;
+  lList *NewList = NULL;
+
+  while(n!=source){
+    int* data = (int*)malloc(sizeof(int));
+    data[0]=n;
+    AuxList=(lList *)malloc(sizeof(lList));
+    AuxList->data=data;
+    AuxList->next=NewList;
+    NewList=AuxList;
+    n=prev[n];
+  }
+  *Path=NewList;
+  return;
 }

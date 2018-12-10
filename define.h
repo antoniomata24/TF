@@ -19,11 +19,6 @@ struct node {
   short int weight;
 };
 
-typedef struct _edge{
-  int v;
-  short int w;
-}Edge;
-
 struct _lList{
   Item data;
   lList *next;
@@ -44,7 +39,7 @@ struct _Pos{
 };
 
 #include "oper.h"
-#include "grafs.h"
+#include "heap.h"
 #include "file.h"
 #include "list.h"
 

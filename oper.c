@@ -13,13 +13,14 @@ void mainOper(Puzzles *Data, FILE *f){
   lList **new_solB = NULL, **new_solC=NULL;
   lList *AllPoints = NULL, *AuxPos=NULL, *AuxPosC = NULL;
   Pos *SinglePos=NULL;
-  int i=0, ini = 0, fim = 0, contador = 0, n=0;
+  int i=0, ini = 0, fim = 0, contador = 0, n=0, fact=0, c=0, j=0;
   short int custo=0, passos=0, x, y, inv=0;
   int tallocs=0;
   link *Auxlink = NULL;
-  Edge *Ed1=NULL, *Ed2=NULL;
-  int iniC = NULL, *fimC=NULL;
-  Edge *AuxC=NULL;
+  link *Ed1=NULL, *Ed2=NULL;
+  int iniC = NULL, *fimC=NULL, totalC=0, *order=NULL, min=INFINITY;
+  link *AuxC=NULL;
+  int **matrix=NULL;
 
   AuxPos = Data->Positions;
   /*Creates Graph to all the eligible points in the puzzle and their possible
@@ -91,6 +92,7 @@ void mainOper(Puzzles *Data, FILE *f){
           AuxPos=AuxPos->next;
         }
       }
+
       fprintf(f, "%hi %hi %c %hi %hi %hi\n", Data->lines, Data->cols, Data->mode,
                                         Data->nmoves , custo, passos);
       for(n=0; n<contador; n++){
@@ -119,16 +121,55 @@ void mainOper(Puzzles *Data, FILE *f){
       AllPoints=convertAllPoints(Data);
       AuxPosC=AllPoints;
       AuxC=AuxPosC->data;
-      iniC=AuxC->v;
-      fimC=(int*)malloc((Data->nmoves-1)*sizeof(int));
+      fimC=(int*)malloc((Data->nmoves)*sizeof(int));
       if(fimC==NULL) exit(0);
-      while(AuxPosC->next!=NULL){
-        AuxC=AuxPosC->next->data;
+      while(AuxPosC!=NULL){
+        AuxC=AuxPosC->data;
         fimC[i]=AuxC->v;
         i++;
         AuxPosC=AuxPosC->next;
       }
 
+      order=(int*)malloc((Data->nmoves)*sizeof(int));
+      if(order==NULL) exit(0);
+      for (n=0; n<(Data->nmoves);n++){
+        order[n]=n;
+      }
+      orderfim=(int*)malloc((Data->nmoves)*sizeof(int));
+      if(order==NULL) exit(0);
+      for (n=0; n<(Data->nmoves);n++){
+        order[n]=n;
+      }
+
+      matrix=(int**)malloc(sizeof(int*)*(Data->nmoves));
+      for (n=0; n<(Data->nmoves); n++){
+        matrix[n]=(int*)malloc(sizeof(int)*(n+1));
+      }
+      for (n=0; n<(Data->nmoves); n++){
+        for (j=0; j<=n; j++){
+          totalC=searchPathC(Data, fimC[n], fimC[j]);
+          if (totalC==-1){
+            inv=1;
+            break;
+          } else {
+            matrix[n][j]=totalC;
+          }
+        }
+        if(inv==1) break;
+      }
+      permute(order, 0, Data->nmoves, matrix, Data, &min, orderfim);
+
+      if ( inv == 1){
+        printSolutions(f, NULL, Data, 0, 0);
+      } else {
+        for (n=0; n<(Data->nmoves); n++){
+          for (j=0; j<=n; j++){
+            printf("Matrix[%d][%d]: %d\n", n, j, matrix[n][j]);
+          }
+        }
+      }
+      /*
+      permute(fimC, 0, (Data->nmoves-1), matrix);
       new_solC = searchPathC(Data, iniC, fimC);
 
       if(new_solC==NULL){
@@ -159,8 +200,7 @@ void mainOper(Puzzles *Data, FILE *f){
       for (i=0; i<(Data->nmoves-1); i++){
         freelList(new_solC[i]);
       }
-      free(new_solC);
-
+      free(new_solC);*/
 
       break;
     default:
@@ -168,6 +208,83 @@ void mainOper(Puzzles *Data, FILE *f){
       printSolutions(f, NULL, Data, 0, 0);
       break;
   }
+
+
+lList *findAdj (Puzzles *Data, int n){
+
+  Puzzles *AuxPuzzle = NULL;
+  lList *lAdj=NULL;
+  short int i=0, j=0;
+  int vi, vf;
+  AuxPuzzle=Data;
+
+  if (AuxPuzzle == NULL)
+      exit(0);
+
+  if(Data->mode=='A' || Data->mode=='B' || Data->mode=='C'){
+
+        vi=n;
+        invertConvertV(vi, Data, &i, &j);
+        if(ValidateMoveA(i, j, 1, 2, Data)==1){
+          vf=convertV(i+1, j+2, Data);
+          NEW(vf, &lAdj, Data->board[i+1][j+2]);
+        }
+        if(ValidateMoveA(i, j, 1, -2, Data)==1){
+          vf=convertV(i+1, j-2, Data);
+          NEW(vf, &lAdj, Data->board[i+1][j-2]);
+        }
+        if(ValidateMoveA(i, j, -1, 2, Data)==1){
+          vf=convertV(i-1, j+2, Data);
+          NEW(vf, &lAdj, Data->board[i-1][j+2]);
+        }
+        if(ValidateMoveA(i, j, -1, -2, Data)==1){
+          vf=convertV(i-1, j-2, Data);
+          NEW(vf, &lAdj, Data->board[i-1][j-2]);
+        }
+        if(ValidateMoveA(i, j, 2, 1, Data)==1){
+          vf=convertV(i+2, j+1, Data);
+          NEW(vf, &lAdj, Data->board[i+2][j+1]);
+        }
+        if(ValidateMoveA(i, j, 2, -1, Data)==1){
+          vf=convertV(i+2, j-1, Data);
+          NEW(vf, &lAdj, Data->board[i+2][j-1]);
+        }
+        if(ValidateMoveA(i, j, -2, 1, Data)==1){
+          vf=convertV(i-2, j+1, Data);
+          NEW(vf, &lAdj,Data->board[i-2][j+1]);
+        }
+        if(ValidateMoveA(i, j, -2, -1, Data)==1){
+          vf=convertV(i-2, j-1, Data);
+          NEW(vf, &lAdj, Data->board[i-2][j-1]);
+        }
+  }
+  return lAdj;
+}
+
+int ValidateMoveA(short int x, short int y, short int difx, short int dify, Puzzles *Data){
+  if(x+difx<0 || y+dify < 0 || x+difx>=Data->lines || y+dify>=Data->cols){
+    return 0;
+  }else if(Data->board[x+difx][y+dify]==0 || Data->board[x][y]==0){
+    return 0;
+  }else{
+    return 1;
+  }
+}
+
+int convertV(short int x, short int y,Puzzles *Data){
+
+  int n = 0;
+
+  n=x*Data->cols;
+  n+=y;
+
+  return n;
+}
+
+void invertConvertV(int n, Puzzles *Data, short int *x, short int *y){
+  (*x)=n/Data->cols;
+  (*y)=n-(*x)*Data->cols;
+}
 
 }
 /** validateAllPoints - checks if all path points inserted in the entry file are
@@ -203,7 +320,7 @@ int validateAllPoints(Puzzles *AuxP){
                       absolute value (horizontal order)
   \param AuxP - Puzzle struct wich contains board values and path points
 
-  returns a linked list with Edge strutcs with all the path points to be analysed
+  returns a linked list with link strutcs with all the path points to be analysed
 */
 lList *convertAllPoints(Puzzles *AuxP){
 
@@ -222,71 +339,6 @@ lList *convertAllPoints(Puzzles *AuxP){
   return lPoints;
 }
 
-int *IniHeap(int n){
-  int *Heap = NULL;
-
-  Heap=(int *)malloc(n*sizeof(int));
-  if(Heap==NULL)
-    exit(0);
-
-  return Heap;
-}
-
-void swap(int **heap, int **posInH, int n1, int n2){
-  int i=0, j=0;
-  int *auxH = *heap;
-  int *auxP = *posInH;
-  i=auxH[n1];
-  j=auxH[n2];
-
-  auxP[i]=n2;
-  auxP[j]=n1;
-  auxH[n1]=j;
-  auxH[n2]=i;
-}
-
-void Hinsert(int **Heap, int *free, int n, unsigned int *price, int **posInH){
-    (*Heap)[*free]=n;
-    (*posInH)[n]=*free;
-    FixUp(Heap, *free, price, posInH);
-    (*free)++;
-}
-
-int HExtractMin(int **Heap, unsigned int *price, int **posinH, int *nfree){
-  int n=0;
-  if(nfree==0)
-    return -1;
-
-  n=*Heap[0];
-  (*posinH)[(*Heap)[0]]=-2;
-
-  (*Heap)[0]=(*Heap)[(*nfree)-1];
-  (*posinH)[(*Heap)[0]]=0;
-  FixDown(Heap, 0, (*nfree)-1, price, posinH);
-  (*nfree)--;
-  return n;
-}
-
-void FixDown(int **Heap, int Idx, int N, unsigned int *price, int **posinH) {
-    int Child;
-    while(2*Idx < N-1) {
-        Child = 2*Idx+1;
-        if (Child < (N-1) && lessPri(price[(*Heap)[Child]], price[(*Heap)[Child+1]]))
-          Child++;
-        if (!lessPri(price[(*Heap)[Idx]], price[(*Heap)[Child]]))
-          break;
-        swap(Heap, posinH, Idx, Child);
-        Idx = Child;
-    }
-
-}
-
-void FixUp(int **Heap, int Idx, unsigned int *price, int **posInH){
-  while (Idx > 0 && lessPri(price[(*Heap)[(Idx-1)/2]], price[(*Heap)[Idx]])){
-    swap(Heap, posInH, Idx, (Idx-1)/2);
-    Idx = (Idx-1)/2;
-  }
-}
 
 /** searchPath - runs Dijkstra algorithm to find the lowest cost path between 2
                 points
@@ -404,176 +456,130 @@ int *searchPath(Puzzles *P, int source, int dest){
   return prev;
 }
 
-lList **searchPathC(Puzzles *P, int source, int *dest){
-  lList **new_sol1= NULL, **new_sol2= NULL;
-  int i=0, n=0, total=0, min = INFINITY, contador=0, ini=0, fim=0;
+
+void permute(int *v, int start, int n, int** matrix, Puzzles *P, int *fimC, int*final)
+{
+  int i, a=0, b=0, total=0;
+  if (start == n-1) {
+    for (a=0; a<(P->nmoves);a++){
+      if (v[a]<v[a+1] && a)
+      total+=matrix()
+    }
+  }
+  else {
+    for ( i = start; i < n; i++) {
+      int tmp = v[i];
+
+      v[i] = v[start];
+      v[start] = tmp;
+      permute(v, start+1, n, matrix, P, fimC);
+      v[start] = v[i];
+      v[i] = tmp;
+    }
+  }
+}
+
+
+int searchPathC(Puzzles *P, int source, int dest){
+  unsigned int *price = NULL;
+  int *prev = NULL;
+  int *heap=NULL;
+  int i=0, v=0, nfree=0, n=0, total=0;
   short int x=0, y=0;
+  link *aux =NULL;
+  lList *laux=NULL, *AllAdj=NULL;
 
-  new_sol1=(lList**)malloc(sizeof(lList*)*(P->nmoves-1));
-  new_sol2=(lList**)malloc(sizeof(lList*)*(P->nmoves-1));
+  AllAdj=findAdj(P, source);
+  if(AllAdj==NULL){
+    return -1;
+  }
+  freelList(AllAdj);
+  AllAdj=NULL;
 
-  for(i=0; i<(P->nmoves-1);i++)
-    new_sol2[i]=NULL;
+  AllAdj=findAdj(P, dest);
+  if(AllAdj==NULL){
+    return -1;
+  }
+  freelList(AllAdj);
+  AllAdj=NULL;
 
-  while(contador<(P->nmoves-1)){
-    total=0;
-    searchAllPath(P, source, dest, contador, &total, new_sol1);
-
-    if(total<min){
-      for(i=0; i<(P->nmoves-1);i++)
-        freelList(new_sol2[i]);
-      new_sol2=new_sol1;
-      min=total;
-    } else {
-      for(i=0; i<(P->nmoves-1);i++)
-        freelList(new_sol1[i]);
-      free(new_sol1);
-    }
-    contador++;
+  if(source==dest){
+    return 0;
+  } else{
+    prev=(int *)malloc((P->lines*P->cols)*sizeof(int));
+    if(prev == NULL)
+      exit(0);
+  }
+  int *posInH = (int *)malloc((P->lines*P->cols)*sizeof(int));
+  price=(unsigned int *)malloc((P->lines*P->cols)*sizeof(unsigned int));
+  if(price == NULL)
+    exit(0);
+  for(i=0; i<(P->lines*P->cols); i++){
+    price[i]=INFINITY;
+    prev[i]=-1;
+    posInH[i]=-1;
   }
 
-  return new_sol2;
-}
+  heap=IniHeap((P->lines*P->cols)/2);
+  price[source]=0;
+  v=source;
+  n=1;
+  Hinsert(&heap, &nfree, v, price, &posInH);
 
+  while (n<(P->lines*P->cols)){
 
-
-
-void searchAllPath(Puzzles *P, int source, int *dest, int fimIn, int *totalIn, lList **new_sol){
-  int *new_sol1= NULL, *new_sol2= NULL, *total=NULL, *auxdest=NULL;
-  int i=0, j=0, n=0, min = INFINITY, contador=0, ini=0, fim=0;
-  short int x=0, y=0;/*
-  lList **new_sol=NULL;*/
-
-  ini=source;
-  total=(int*)malloc(sizeof(int)*(P->nmoves-1));
-  auxdest=(int*)malloc(sizeof(int)*(P->nmoves-1));
-  for (i=0; i<(P->nmoves-1);i++)
-    auxdest[i]=dest[i];
-
-  new_sol1=searchPath(P, ini, auxdest[fimIn]);
-  total[n]=0;
-  j=auxdest[fimIn];
-  while(j!=ini){
-    invertConvertV(j, P, &x, &y);
-    total[n] += P->board[x][y];
-    j=new_sol1[j];
-  }
-
-  fim=auxdest[fimIn];
-
-  addPathSol(new_sol1, &(new_sol[n++]), ini, fim);
-
-  ini=auxdest[fimIn];
-
-  if (fim==auxdest[(P->nmoves-2)] && (P->nmoves-1)>1){
-    auxdest[(P->nmoves-2)]=INFINITY;
-  }
-  if (fim!=auxdest[(P->nmoves-2)] && (P->nmoves-1)>1){
-    auxdest[fimIn]=auxdest[(P->nmoves-2)];
-    auxdest[(P->nmoves-2)]=INFINITY;
-  }
-  if(auxdest[(P->nmoves-2)]==fim && (P->nmoves-1)==1){
-    free(auxdest);
-    auxdest=NULL;
-  }
-
-  while (auxdest!=NULL){
-
-    min=INFINITY;
-    total[n]=0;
-    contador=0;
-    while(contador<((P->nmoves-1)-n)){
-      total[n]=0;
-      j=auxdest[contador];
-      new_sol1=searchPath(P, ini, auxdest[contador]);
-      while(j!=ini){
-        invertConvertV(j, P, &x, &y);
-        total[n] += P->board[x][y];
-        j=new_sol1[j];
-        }
-      if(total[n]<min){
-        min=total[n];
-        i=contador;
-        new_sol2=new_sol1;
-        fim=auxdest[i];
-      } else {
-        free(new_sol1);
-      }
-      contador++;
-    }
-    addPathSol(new_sol2, &(new_sol[n]), ini, fim);
-
-    ini=auxdest[i];
-
-    if (fim==auxdest[contador-1] && contador>1){
-      auxdest[n]=INFINITY;
-    }
-    if (fim!=auxdest[contador-1] && contador>1){
-      auxdest[i]=auxdest[contador-1];
-      auxdest[contador-1]=INFINITY;
-    }
-    if(auxdest[contador-1]==fim && contador==1){
-      free(auxdest);
-      auxdest=NULL;
-    }
+    v=HExtractMin(&heap, price, &posInH, &nfree);
     n++;
-  }
-  for (i=0; i<(P->nmoves-1);i++)
-    *totalIn+=total[i];
-}
+    if(v==-1){
+      free(heap);
+      free(price);
+      free(posInH);
+      free(prev);
+      return -1;
+    }
+    AllAdj=findAdj(P, v);
 
-/* addPathPoint - add a single point to the Path list computed by the "searchPathC"
-                fuction
+    laux=AllAdj;
+    if(laux==NULL)
+      break;
 
-  \param Path - linked list with Edge structs that contain all path points where
-                a single path point will be inserted (at the end of the list)
-  \param n - absolute value of the path point to be inserted in the path list
-*/
-void addPathPoint(lList **Path, int n){
-  lList *NewList = *Path;
-  int* data = (int*)malloc(sizeof(int));
+    aux=laux->data;
 
-    data[0]=n;
-    InsertListNode(&NewList, data);
-    *Path=NewList;
-}
-
-void addPathSol(int *prev, lList **Path, int source, int n){
-
-  lList *AuxList=NULL;
-  lList *NewList = NULL;
-
-  while(n!=source){
-    int* data = (int*)malloc(sizeof(int));
-    data[0]=n;
-    AuxList=(lList *)malloc(sizeof(lList));
-    AuxList->data=data;
-    AuxList->next=NewList;
-    NewList=AuxList;
-    n=prev[n];
-  }
-  *Path=NewList;
-  return;
-}
-
-int searchMin(int n, int *visited, int *price){
-    int min=INFINITY, i, v;
-
-    for(i=0; i<n; i++){
-        if(price[i]<min&&visited[i]==0){
-            min=price[i];
-            v=i;
+    while(laux!=NULL){
+      aux=laux->data;
+      if(price[aux->v]>aux->weight+price[v]){
+        price[aux->v]=aux->weight+price[v];
+        if(posInH[aux->v]==-1){
+          Hinsert(&heap, &nfree, aux->v, price, &posInH);
+        }else{
+          i=posInH[aux->v];
+          if(i!=-2)
+            if(price[heap[i]]<price[heap[(i-1)/2]])
+              FixUp(&heap, i, price, &posInH);
         }
+        prev[aux->v]=v;
+      }
+
+      laux=laux->next;
     }
 
-    return v;
-}
-
-int vEmpty(int *Data, int n){
-    int i=0;
-    for(i=0; i<n; i++){
-        if(Data[i]!=1)
-            return 0;
+    if(prev[dest]!=-1){
+      total=price[dest];
+      free(heap);
+      free(price);
+      free(posInH);
+      freelList(AllAdj);
+      free(prev);
+      AllAdj=NULL;
+      return total;
     }
-    return 1;
+    freelList(AllAdj);
+    AllAdj=NULL;
+  }
+  free(heap);
+  free(price);
+  free(posInH);
+  free(prev);
+  prev=NULL;
+  return -1;
 }

@@ -162,52 +162,8 @@ void printSolutions(FILE *f, int *sol, Puzzles *Puzzle, int ini, int fim){
 
 }
 
-void printSolutionsB(FILE *f, Puzzles *Puzzle,
-                    int ini, int fim, int custo, int passos){
-
-  fprintf(f, "%hi %hi %c %hi %hi %hi\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
-                                    Puzzle->nmoves , custo, passos);
-}
-
-void printSolutionsBSteps(FILE *f, int *sol, Puzzles *Puzzle,
-                          int ini, int fim){
-
-  printreverse(sol, Puzzle, ini, fim, fim, f);
-
-}
-
-void printSolutionsC(FILE *f, lList *Sol, Puzzles *Puzzle){
-  short int custo=0, passos=0, x=0, y=0;
-  int *AuxE=NULL;
-  lList *AuxL = Sol;
-
-  if (Sol == NULL){
-    custo = -1;
-    passos = 0;
-    fprintf(f, "%hi %hi %c %hi %hi %hi\n\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
-                                      Puzzle->nmoves , custo, passos);
-    return;
-  }
-
-  while(AuxL!=NULL){
-    AuxE=AuxL->data;
-    invertConvertV(AuxE[0], Puzzle, &x, &y);
-    custo += Puzzle->board[x][y];
-    passos++;
-    AuxL=AuxL->next;
-  }
-
-  fprintf(f, "%hi %hi %c %hi %hi %hi\n", Puzzle->lines, Puzzle->cols, Puzzle->mode,
-                                    Puzzle->nmoves , custo, passos);
-
-  printPathList(Sol, Puzzle, f);
-
-  fprintf(f,"\n");
-
-}
-
 void printPathList(lList *Sol, Puzzles *P, FILE *fOut){
-  Edge *AuxE = NULL;
+  link *AuxE = NULL;
   lList *AuxL = Sol;
   short int x=0, y=0;
 
