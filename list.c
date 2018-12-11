@@ -23,31 +23,6 @@ void InsertListNode(lList **ListIn ,Item DataIn){
   }
 }
 
-void freeNode(Item DataOut, lList **First){
-  lList *Aux = *First;
-  lList *Prev = NULL;
-  if (Aux!=NULL && Aux->data==DataOut) {
-    *First=Aux->next;
-    free(Aux->data);
-    free(Aux);
-  }else{
-      if (Aux!=NULL && Aux->next==NULL &&Aux->data==DataOut) {
-        free(Aux->data);
-        free(Aux);
-        *First=NULL;
-        return;
-      }
-
-      while (Aux!=NULL&&Aux->data!=DataOut) {
-        Prev=Aux;
-        Aux=Aux->next;
-      }
-      Prev->next=Aux->next;
-      free(Aux->data);
-      free(Aux);
-  }
-}
-
 void freelList(lList *DataOut){
 
   if(DataOut==NULL)
@@ -74,22 +49,6 @@ void freeAllPuzzle(Puzzles *Data){
   }
 
   free(Data);
-}
-
-/* addPathPoint - add a single point to the Path list computed by the "searchPathC"
-                fuction
-
-  \param Path - linked list with link structs that contain all path points where
-                a single path point will be inserted (at the end of the list)
-  \param n - absolute value of the path point to be inserted in the path list
-*/
-void addPathPoint(lList **Path, int n){
-  lList *NewList = *Path;
-  int* data = (int*)malloc(sizeof(int));
-
-    data[0]=n;
-    InsertListNode(&NewList, data);
-    *Path=NewList;
 }
 
 void addPathSol(int *prev, lList **Path, int source, int n){
