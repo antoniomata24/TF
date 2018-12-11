@@ -1,3 +1,22 @@
+#
+#  File name: makefile
+#
+#  Author: Rafael Abranches, 90174
+#					 António Mata, 90022
+#
+#  Release date: 2018/12/11
+#
+#  Description: Makefile for the program tuktuk
+#
+#  Usage:
+#     1) To generate the executable file for the program tuktuk,
+#       run
+#         $ make
+#
+#     2) To clean all object files and the executable file of tuktuk,
+#        run
+#         $ make clean
+#
 
 #  Compiler
 CC = gcc
@@ -29,7 +48,7 @@ heap.o : heap.h heap.c
 	$(CC) -O3 -c heap.c
 
 clean::
-	rm -f *.o *.walks core a.out tuktuk *~
+	rm -f *.o core a.out tuktuk *~
 
 depend::
 	makedepend $(SOURCES)

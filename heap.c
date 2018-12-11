@@ -1,3 +1,4 @@
+/* including the header files used */
 #include "heap.h"
 
 int *IniHeap(int n){

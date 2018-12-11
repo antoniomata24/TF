@@ -1,3 +1,4 @@
+/* including the header files used */
 #include "file.h"
 
 void readFile(char *nomef){

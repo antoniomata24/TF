@@ -1,3 +1,18 @@
+/*******************************************************************
+* TouristKnights - Projeto AED 2018/2019 MEEC - IST
+*
+* Author: António da Mata nº90022
+*         Rafael Abranches nº90174
+*
+* File name: oper.c
+*
+* Release date: 2018/12/11
+*
+* Description: file that has the funtions to compute the solutions according
+*             to the mode for each puzzle 
+*
+*******************************************************************/
+/* including the header files used */
 #include "oper.h"
 
 /** mainOper - computes and prints in exit file the solutions to the multiple

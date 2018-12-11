@@ -1,7 +1,9 @@
 #ifndef heap_h
 #define heap_h
+
 #include "define.h"
 
+/* definition of the functions used in the heap.c file */
 int *IniHeap(int );
 void swap(int **, int **, int , int);
 void Hinsert(int ** , int *, int, unsigned int *, int **);

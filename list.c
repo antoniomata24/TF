@@ -1,3 +1,4 @@
+/* including the header files used */
 #include "list.h"
 
 void NEW(int v, lList **next, short int weight){
