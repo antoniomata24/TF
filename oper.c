@@ -74,9 +74,9 @@ void mainOper(Puzzles *Data, FILE *f){
           break;
         }
         addPathSol(new_sol, &(new_solB[contador]), Ed1->v, Ed2->v);
+        free(new_sol);
         AuxPos=AuxPos->next;
         contador++;
-        free(new_sol);
         new_sol=NULL;
       }
       if(inv==1)
@@ -100,7 +100,8 @@ void mainOper(Puzzles *Data, FILE *f){
       }
       fprintf(f, "\n");
       /*freeing all the memory used*/
-      for (i=0; i<tallocs; i++){
+      freelList(AllPoints);
+      for (i=0; i<(Data->nmoves-1); i++){
         freelList(new_solB[i]);
       }
       free(new_solB);
@@ -143,10 +144,10 @@ void mainOper(Puzzles *Data, FILE *f){
 
       matrix=(int**)malloc(sizeof(int*)*(Data->nmoves));
       for (n=0; n<(Data->nmoves); n++){
-        matrix[n]=(int*)malloc(sizeof(int)*(n+1));
+        matrix[n]=(int*)malloc(sizeof(int)*(Data->nmoves));
       }
       for (n=0; n<(Data->nmoves); n++){
-        for (j=0; j<=n; j++){
+        for (j=0; j<(Data->nmoves); j++){
           totalC=searchPathC(Data, fimC[n], fimC[j]);
           if (totalC==-1){
             inv=1;
@@ -157,35 +158,31 @@ void mainOper(Puzzles *Data, FILE *f){
         }
         if(inv==1) break;
       }
-      permute(order, 0, Data->nmoves, matrix, Data, &min, orderfim);
-      printf("min: %d\n\n", min);
+      permute(order, 1, Data->nmoves, matrix, Data, &min, orderfim);
 
       if ( inv == 1){
         printSolutions(f, NULL, Data, 0, 0);
       } else {
+        printf("min: %d\n\n", min);
         for (n=0; n<(Data->nmoves); n++){
-          for (j=0; j<=n; j++){
+          for (j=0; j<(Data->nmoves); j++){
             printf("Matrix[%d][%d]: %d\n", n, j, matrix[n][j]);
           }
         }
+        for (n=0; n<(Data->nmoves); n++){
+          printf("final[%d] : %d\n", n, orderfim[n]);
+        }
       }
-      for (n=0; n<(Data->nmoves); n++){
-        printf("final[%d] : %d\n", n, orderfim[n]);
-      }
-      /*
-      permute(fimC, 0, (Data->nmoves-1), matrix);
-      new_solC = searchPathC(Data, iniC, fimC);
 
-      if(new_solC==NULL){
-        printSolutions(f, NULL, Data, 0, 0);
+      for(i=0; i<(Data->nmoves-1);i++){
+        new_sol=searchPath(Data, fimC[orderfim[i]], fimC[orderfim[i+1]]);
+        addPathSol(new_sol, &(new_solC[i]), fimC[orderfim[i]], fimC[orderfim[i+1]]);
         free(new_sol);
-        inv=1;
-        break;
       }
 
       for(n=0; n<(Data->nmoves-1); n++){
         AuxPosC=new_solC[n];
-        while(AuxPosC->data!=NULL){
+        while(AuxPosC!=NULL){
           AuxC=AuxPosC->data;
           invertConvertV(AuxC->v, Data, &x, &y);
           custo+=Data->board[x][y];
@@ -201,10 +198,17 @@ void mainOper(Puzzles *Data, FILE *f){
       }
       fprintf(f, "\n");
 
+      free(order);
+      free(orderfim);
+      for(i=0;i<Data->nmoves;i++)
+        free(matrix[i]);
+      free(matrix);
+      free(fimC);
+      freelList(AllPoints);
       for (i=0; i<(Data->nmoves-1); i++){
         freelList(new_solC[i]);
       }
-      free(new_solC);*/
+      free(new_solC);
 
       break;
     default:
@@ -466,11 +470,12 @@ void permute(int *v, int start, int n, int** matrix, Puzzles *P, int *min, int*f
 {
   int i, a=0, b=0, total=0;
   if (start == n-1) {
-    for (a=0; a<(P->nmoves-1);a++){
+    for (a=0; a<(P->nmoves-1);a++){/*
       if (v[a]<v[a+1])
         total+=matrix[v[a+1]][v[a]];
-      if (v[a]>v[a+1])
+      if (v[a]>v[a+1])*/
         total+=matrix[v[a]][v[a+1]];
+        if (total>(*min)) break;
     }
     if (total<(*min)){
       (*min)=total;
