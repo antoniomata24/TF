@@ -49,7 +49,7 @@ void NEW(int v, lList **next, short int weight){
 *
 * Side-Effects: inserts a node in the list
 *
-* Description: inserts a node with the information given in DataIn in the ListIn
+* Description: inserts a node with the information given in DataIn in the tail of the ListIn
 *
 *****************************************************************************/
 void InsertListNode(lList **ListIn ,Item DataIn){

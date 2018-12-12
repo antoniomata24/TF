@@ -47,9 +47,11 @@ int *IniHeap(int n){
 *
 * Returns: none
 *
-* Side-Effects: changes the positions of n1 and n2 in the heap
+* Side-Effects: changes the positions of n1 and n2 in the heap and
+*               updates its position in the heap (posInH)
 *
-* Description: changes the positions of n1 and n2 in the heap
+* Description: changes the positions of n1 and n2 in the heap and
+*              updates its position in the heap (posInH)
 *
 *****************************************************************************/
 void swap(int **heap, int **posInH, int n1, int n2){

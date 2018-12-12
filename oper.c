@@ -608,13 +608,13 @@ int *searchPath(Puzzles *P, int source, int dest){
 /******************************************************************************
 * permute()
 *
-* Arguments: v - Puzzle that is being analysed
+* Arguments: v - vector that will be permutated
 *           start - absolute value of the origin of the intended Path
 *           n - absolute value of the destination of the intended path
-*           matrix -
-*           P -
-*           min -
-*           final - order of the lowest cost
+*           matrix - matix with the cost of the path between points
+*           P - Puzzle that is being analysed
+*           min - lowest path cost
+*           final - order of the path with the lowest cost
 *
 * Returns: none
 *
